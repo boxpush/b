@@ -23,20 +23,33 @@ layout: default
   let autoReload = false;
   let reloadIntervalId = null;
 
-  const btn = document.getElementById('autoReloadBtn');
   const img = document.getElementById('viewer');
+  const btn = document.getElementById('autoReloadBtn');
+
+  // 初期状態に合わせてクラスをセット（autoReload が既にあるならそれを使う）
+  btn.classList.toggle('active', autoReload);
+  btn.classList.toggle('inactive', !autoReload);
+  btn.setAttribute('aria-pressed', String(autoReload)); // 画面リーダー対応
 
   btn.addEventListener('click', () => {
     autoReload = !autoReload;
 
     if (autoReload) {
       btn.textContent = '自動更新(5分毎): ON';
+      btn.classList.add('active');
+      btn.classList.remove('inactive');
+      btn.setAttribute('aria-pressed', 'true');
+
       reloadIntervalId = setInterval(() => {
         const src = img.src.split('?')[0];
         img.src = src + '?t=' + new Date().getTime();
       }, 300000);
     } else {
       btn.textContent = '自動更新(5分毎): OFF';
+      btn.classList.remove('active');
+      btn.classList.add('inactive');
+      btn.setAttribute('aria-pressed', 'false');
+
       clearInterval(reloadIntervalId);
       reloadIntervalId = null;
     }
