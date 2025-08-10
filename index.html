@@ -1,0 +1,96 @@
+---
+layout: default
+---
+
+<div style="text-align:center;">
+  <!-- 画像をリンクで囲む -->
+  <a id="imageLink" href="" target="_blank" rel="noopener noreferrer">
+    <img id="viewer" alt="画像" style="max-width:90%; max-height:80vh; display:block; margin: 1rem auto;">
+  </a>
+  <button id="prev">←</button>
+  <input type="text" id="dateInput" placeholder="yyyymmdd" style="font-size:1.2rem; width:120px; text-align:center;">
+  <button id="next">→</button>
+  <button id="autoReloadBtn">自動更新: OFF</button>
+</div>
+
+<script>
+  const startDate = new Date(2025, 7, 8); // 2025-08-08開始（0-basedなので7は8月）
+  const today = new Date({{ site.time | date: "%Y" }}, {{ site.time | date: "%m" | minus: 1 }}, {{ site.time | date: "%d" }});
+  const daysSinceStart = Math.floor((today - startDate) / (1000*60*60*24));
+  let offset = daysSinceStart;
+
+  let autoReload = false;
+  let reloadIntervalId = null;
+
+  const btn = document.getElementById('autoReloadBtn');
+  const img = document.getElementById('viewer');
+
+  btn.addEventListener('click', () => {
+    autoReload = !autoReload;
+
+    if (autoReload) {
+      btn.textContent = '自動更新(5分毎): ON';
+      reloadIntervalId = setInterval(() => {
+        const src = img.src.split('?')[0];
+        img.src = src + '?t=' + new Date().getTime();
+      }, 300000);
+    } else {
+      btn.textContent = '自動更新(5分毎): OFF';
+      clearInterval(reloadIntervalId);
+      reloadIntervalId = null;
+    }
+  });
+
+  function getDateString(daysFromStart) {
+    const d = new Date(startDate);
+    d.setDate(d.getDate() + daysFromStart);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}${m}${day}.png`;
+  }
+
+  function showImage() {
+    const imgSrc = getDateString(offset);
+    const viewer = document.getElementById('viewer');
+    viewer.src = imgSrc;
+
+    // リンクのhrefにも画像URLをセット
+    document.getElementById('imageLink').href = imgSrc;
+
+    // フォームにも日付を反映
+    const d = new Date(startDate);
+    d.setDate(d.getDate() + offset);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    document.getElementById('dateInput').value = `${y}${m}${day}`;
+  }
+
+  document.getElementById('prev').onclick = () => {
+    offset = Math.max(0, offset - 1);
+    showImage();
+  };
+  document.getElementById('next').onclick = () => {
+    offset = Math.min(daysSinceStart, offset + 1);
+    showImage();
+  };
+
+  document.getElementById('dateInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      const val = this.value.trim();
+      if (/^\d{8}$/.test(val)) {
+        const y = parseInt(val.slice(0,4),10);
+        const m = parseInt(val.slice(4,6),10);
+        const d = parseInt(val.slice(6,8),10);
+        const inputDate = new Date(y, m-1, d);
+        if (inputDate >= startDate && inputDate <= today) {
+          offset = Math.floor((inputDate - startDate) / (1000*60*60*24));
+          showImage();
+        }
+      }
+    }
+  });
+
+  showImage();
+</script>
