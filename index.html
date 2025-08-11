@@ -80,7 +80,7 @@ layout: default
   function showImage() {
     const base = "https://f005.backblazeb2.com/file/boxpush/";
     const imgSrc = base + getDateString(offset) + "b.png";
-    const txtSrc = base + "txt/" + getDateString(offset) + ".txt";
+    const txtSrc = "txt/" + getDateString(offset) + ".txt";
     const viewer = document.getElementById('viewer');
     viewer.src = imgSrc;
 
