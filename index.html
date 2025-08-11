@@ -74,11 +74,12 @@ layout: default
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
-    return `${y}${m}${day}b.png`;
+    return `${y}${m}${day}`;
   }
 
   function showImage() {
-    const imgSrc = "https://f005.backblazeb2.com/file/boxpush/" + getDateString(offset);
+    const base = "https://f005.backblazeb2.com/file/boxpush/";
+    const imgSrc = base + getDateString(offset) + "b.png";
     const viewer = document.getElementById('viewer');
     viewer.src = imgSrc;
 
