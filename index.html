@@ -92,7 +92,7 @@ layout: default
     const imgSrc = base + getDateString(offset) + "b.png";
     const txtSrc = "txt/" + getDateString(offset) + ".txt";
     const viewer = document.getElementById('viewer');
-    viewer.src = imgSrc;
+    viewer.src = imgSrc + '?t=' + new Date().getTime();
 
     // リンクのhrefにも画像URLをセット
     document.getElementById('imageLink').href = imgSrc;
