@@ -80,6 +80,7 @@ layout: default
   function showImage() {
     const base = "https://f005.backblazeb2.com/file/boxpush/";
     const imgSrc = base + getDateString(offset) + "b.png";
+    const txtSrc = base + "txt/" + getDateString(offset) + ".txt";
     const viewer = document.getElementById('viewer');
     viewer.src = imgSrc;
 
@@ -93,6 +94,17 @@ layout: default
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     document.getElementById('dateInput').value = `${y}${m}${day}`;
+    fetch(txtSrc)
+      .then(response => {
+        if (!response.ok) throw new Error('');
+        return response.text();
+      })
+      .then(text => {
+        document.getElementById('max-viewers').textContent = text;
+      })
+      .catch(error => {
+        document.getElementById('max-viewers').textContent = '';
+      });
   }
 
   document.getElementById('prev').onclick = () => {
