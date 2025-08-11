@@ -25,6 +25,7 @@ layout: default
   <input type="text" id="dateInput" placeholder="yyyymmdd" style="font-size:1.2rem; width:120px; text-align:center;">
   <button id="next">→</button>
   <button id="autoReloadBtn">自動更新(5分毎): OFF</button>
+  <span id="countdown"></span>
 </div>
 <script>
   const startDate = new Date(2025, 7, 8); // 2025-08-08開始（0-basedなので7は8月）
@@ -33,10 +34,12 @@ layout: default
   let offset = daysSinceStart;
 
   let autoReload = false;
-  let reloadIntervalId = null;
+  let countdownSeconds = 300;
+  let countdownIntervalId = null;
 
   const img = document.getElementById('viewer');
   const btn = document.getElementById('autoReloadBtn');
+  const countdownElem = document.getElementById('countdown');
 
   // 初期状態に合わせてクラスをセット（autoReload が既にあるならそれを使う）
   btn.classList.toggle('active', autoReload);
@@ -52,17 +55,26 @@ layout: default
       btn.classList.remove('inactive');
       btn.setAttribute('aria-pressed', 'true');
 
-      reloadIntervalId = setInterval(() => {
-        showImage();
-      }, 300000);
+      countdownSeconds = 300;
+      countdownElem.textContent = `${countdownSeconds}`;
+
+      countdownIntervalId = setInterval(() => {
+        countdownSeconds--;
+        if (countdownSeconds <= 0) {
+          countdownSeconds = 300;
+          showImage();
+        }
+        countdownElem.textContent = `${countdownSeconds}`;
+      }, 1000);
     } else {
       btn.textContent = '自動更新(5分毎): OFF';
       btn.classList.remove('active');
       btn.classList.add('inactive');
       btn.setAttribute('aria-pressed', 'false');
 
-      clearInterval(reloadIntervalId);
-      reloadIntervalId = null;
+      clearInterval(countdownIntervalId);
+      countdownIntervalId = null;
+      countdownElem.textContent = '';
     }
   });
 
