@@ -53,8 +53,7 @@ layout: default
       btn.setAttribute('aria-pressed', 'true');
 
       reloadIntervalId = setInterval(() => {
-        const src = img.src.split('?')[0];
-        img.src = src + '?t=' + new Date().getTime();
+        showImage();
       }, 300000);
     } else {
       btn.textContent = '自動更新(5分毎): OFF';
