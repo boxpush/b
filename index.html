@@ -28,6 +28,7 @@ layout: default
   <span id="countdown"></span>
 </div>
 <script>
+  const repo = "b"
   const startDate = new Date(2025, 7, 8); // 2025-08-08開始（0-basedなので7は8月）
   const today = new Date(new Date().getTime() - 10 * 60 * 1000);
   const daysSinceStart = Math.floor((today - startDate) / (1000*60*60*24));
@@ -89,8 +90,8 @@ layout: default
 
   function showImage() {
     const base = "https://f005.backblazeb2.com/file/boxpush/";
-    const imgSrc = base + getDateString(offset) + "b.png";
-    const txtSrc = "txt/" + getDateString(offset) + ".txt";
+    const imgSrc = base + getDateString(offset) + repo + ".png";
+    const txtSrc = "https://raw.githubusercontent.com/boxpush/" + repo + "/main/txt/" + getDateString(offset) + ".txt";
     const viewer = document.getElementById('viewer');
     viewer.src = imgSrc + '?t=' + new Date().getTime();
 
