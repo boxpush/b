@@ -16,7 +16,7 @@
   <div id="loading">読み込み中...</div>
   <table id="videoTable" style="display:none;">
     <thead>
-      <tr><th>動画ID</th><th>タイトル</th></tr>
+      <tr><th>タイトル</th></tr>
     </thead>
     <tbody></tbody>
   </table>
@@ -27,7 +27,7 @@
   </nav>
 
   <script>
-    const CSV_URL = 'link_test.txt';
+    const CSV_URL = '動画リスト.tsv'; // サーバ上のファイルパスに置き換えてください
     const PAGE_SIZE = 100;
 
     let videos = [];
@@ -35,7 +35,6 @@
     let totalPages = 1;
 
     function parseTSV(tsv) {
-      // タブ区切りCSVを配列にパース（ヘッダーなし想定）
       return tsv.trim().split('\n').map(line => line.split('\t'));
     }
 
@@ -47,16 +46,13 @@
       for (let i = start; i < end; i++) {
         const [videoId, title] = videos[i];
         const tr = document.createElement('tr');
-        const idTd = document.createElement('td');
         const titleTd = document.createElement('td');
         const a = document.createElement('a');
         a.href = `https://www.youtube.com/watch?v=${videoId}`;
         a.target = '_blank';
         a.rel = 'noopener noreferrer';
-        a.textContent = videoId;
-        idTd.appendChild(a);
-        titleTd.textContent = title;
-        tr.appendChild(idTd);
+        a.textContent = title;
+        titleTd.appendChild(a);
         tr.appendChild(titleTd);
         tbody.appendChild(tr);
       }
