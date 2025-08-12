@@ -72,3 +72,43 @@
       ['Top', 'Bottom'].forEach(pos => {
         document.getElementById(`pageInfo${pos}`).textContent = `${page} / ${totalPages}`;
         document.getElementById(`prevBtn${pos}`).disabled = page === 1;
+        document.getElementById(`nextBtn${pos}`).disabled = page === totalPages;
+        document.getElementById(`firstBtn${pos}`).disabled = page === 1;
+        document.getElementById(`lastBtn${pos}`).disabled = page === totalPages;
+      });
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch(CSV_URL);
+        if (!res.ok) throw new Error('ファイルの読み込みに失敗しました');
+        const text = await res.text();
+        videos = parseTSV(text);
+        totalPages = Math.ceil(videos.length / PAGE_SIZE);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('videoTable').style.display = '';
+        document.getElementById('paginationTop').style.display = '';
+        document.getElementById('paginationBottom').style.display = '';
+        renderPage(currentPage);
+      } catch (e) {
+        document.getElementById('loading').textContent = e.message;
+      }
+    }
+
+    function goPage(newPage) {
+      if (newPage < 1 || newPage > totalPages) return;
+      currentPage = newPage;
+      renderPage(currentPage);
+    }
+
+    ['Top', 'Bottom'].forEach(pos => {
+      document.getElementById(`prevBtn${pos}`).addEventListener('click', () => goPage(currentPage - 1));
+      document.getElementById(`nextBtn${pos}`).addEventListener('click', () => goPage(currentPage + 1));
+      document.getElementById(`firstBtn${pos}`).addEventListener('click', () => goPage(1));
+      document.getElementById(`lastBtn${pos}`).addEventListener('click`, () => goPage(totalPages));
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
