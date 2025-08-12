@@ -7,12 +7,19 @@
     table { border-collapse: collapse; width: 100%; }
     th, td { border: 1px solid #ccc; padding: 4px; }
     th { background: #eee; }
-    nav { margin-top: 10px; }
+    nav { margin: 10px 0; text-align: center; }
     button { margin: 0 5px; }
   </style>
 </head>
 <body>
   <h1>YouTube動画リスト</h1>
+
+  <nav id="paginationTop" style="display:none;">
+    <button id="prevBtnTop" disabled>前へ</button>
+    <span id="pageInfoTop"></span>
+    <button id="nextBtnTop" disabled>次へ</button>
+  </nav>
+
   <div id="loading">読み込み中...</div>
   <table id="videoTable" style="display:none;">
     <thead>
@@ -20,14 +27,15 @@
     </thead>
     <tbody></tbody>
   </table>
-  <nav id="pagination" style="display:none;">
-    <button id="prevBtn" disabled>前へ</button>
-    <span id="pageInfo"></span>
-    <button id="nextBtn" disabled>次へ</button>
+
+  <nav id="paginationBottom" style="display:none;">
+    <button id="prevBtnBottom" disabled>前へ</button>
+    <span id="pageInfoBottom"></span>
+    <button id="nextBtnBottom" disabled>次へ</button>
   </nav>
 
   <script>
-    const CSV_URL = '動画リスト.tsv'; // サーバ上のファイルパスに置き換えてください
+    const CSV_URL = '動画リスト.tsv'; // 適宜変更
     const PAGE_SIZE = 100;
 
     let videos = [];
@@ -40,58 +48,3 @@
 
     function renderPage(page) {
       const tbody = document.querySelector('#videoTable tbody');
-      tbody.innerHTML = '';
-      const start = (page - 1) * PAGE_SIZE;
-      const end = Math.min(start + PAGE_SIZE, videos.length);
-      for (let i = start; i < end; i++) {
-        const [videoId, title] = videos[i];
-        const tr = document.createElement('tr');
-        const titleTd = document.createElement('td');
-        const a = document.createElement('a');
-        a.href = `https://www.youtube.com/watch?v=${videoId}`;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        a.textContent = title;
-        titleTd.appendChild(a);
-        tr.appendChild(titleTd);
-        tbody.appendChild(tr);
-      }
-      document.getElementById('pageInfo').textContent = `${page} / ${totalPages}`;
-      document.getElementById('prevBtn').disabled = page === 1;
-      document.getElementById('nextBtn').disabled = page === totalPages;
-    }
-
-    async function loadData() {
-      try {
-        const res = await fetch(CSV_URL);
-        if (!res.ok) throw new Error('ファイルの読み込みに失敗しました');
-        const text = await res.text();
-        videos = parseTSV(text);
-        totalPages = Math.ceil(videos.length / PAGE_SIZE);
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('videoTable').style.display = '';
-        document.getElementById('pagination').style.display = '';
-        renderPage(currentPage);
-      } catch (e) {
-        document.getElementById('loading').textContent = e.message;
-      }
-    }
-
-    document.getElementById('prevBtn').addEventListener('click', () => {
-      if (currentPage > 1) {
-        currentPage--;
-        renderPage(currentPage);
-      }
-    });
-
-    document.getElementById('nextBtn').addEventListener('click', () => {
-      if (currentPage < totalPages) {
-        currentPage++;
-        renderPage(currentPage);
-      }
-    });
-
-    loadData();
-  </script>
-</body>
-</html>
