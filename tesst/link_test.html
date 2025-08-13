@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>YouTube動画リスト（正規表現検索＆ページネーション）</title>
+  <title>公開動画リスト</title>
   <style>
     table { border-collapse: collapse; width: 100%; }
     th, td { border: 1px solid #ccc; padding: 4px; }
@@ -14,10 +14,10 @@
   </style>
 </head>
 <body>
-  <h1>YouTube動画リスト</h1>
+  <h1>公開動画リスト</h1>
 
   <div id="searchForm">
-    <input type="text" id="searchInput" placeholder="タイトルを正規表現で検索" />
+    <input type="text" id="searchInput" placeholder="日時・タイトルを正規表現で検索" />
     <button id="searchBtn">検索</button>
     <button id="clearBtn">クリア</button>
   </div>
@@ -140,7 +140,7 @@
         alert('正規表現の構文エラーです');
         return;
       }
-      filteredVideos = videos.filter(([id, date, title]) => regex.test(title));
+      filteredVideos = videos.filter(([id, date, title]) => regex.test(date) || regex.test(title));
       renderPage(1);
     }
 
