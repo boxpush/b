@@ -1,87 +1,104 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>YouTube プレイヤー一覧</title>
-<style>
-  body {
-    font-family: sans-serif;
-    margin: 0;
-    padding: 20px;
-    background: #f4f4f4;
-  }
-  .video-card {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-    padding: 10px;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .video-info {
-    padding: 5px 0;
-  }
-  .video-title {
-    font-size: 1.1em;
-    font-weight: bold;
-    margin-bottom: 4px;
-  }
-  .video-date {
-    font-size: 0.9em;
-    color: #666;
-  }
-  iframe {
-    width: 100%;
-    height: 315px; /* デフォルト16:9比率 */
-    max-width: 560px;
-    display: block;
-    margin: 0 auto;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>限定公開動画リスト</title>
+    <style>
+        .container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+        .video-item {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .video-info {
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .video-title {
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+        .video-date {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .player-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+        }
+        .player-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
+    <h3>限定公開動画リスト</h3>
 
-<h1>YouTube プレイヤー一覧</h1>
-<div id="players-container"></div>
+    <div class="container">
+        </div>
 
-<script>
-fetch('id_title_unlisted.txt')
-  .then(res => res.text())
-  .then(text => {
-    const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
-    const container = document.getElementById('players-container');
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.querySelector('.container');
+            const dataFile = 'id_title_unlisted.txt';
 
-    lines.forEach(line => {
-      const [id, date, title] = line.split('\t').map(s => s.trim());
-
-      // カード作成
-      const card = document.createElement('div');
-      card.className = 'video-card';
-
-      // iframe生成
-      const iframe = document.createElement('iframe');
-      iframe.src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`;
-      iframe.frameBorder = "0";
-      iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-      iframe.allowFullscreen = true;
-
-      // 情報
-      const infoDiv = document.createElement('div');
-      infoDiv.className = 'video-info';
-      infoDiv.innerHTML = `
-        <div class="video-title">${title}</div>
-        <div class="video-date">${date}</div>
-      `;
-
-      card.appendChild(iframe);
-      card.appendChild(infoDiv);
-      container.appendChild(card);
-    });
-  })
-  .catch(err => console.error('読み込みエラー:', err));
-</script>
+            fetch(dataFile)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('ファイルの読み込みに失敗しました。');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    const lines = data.split('\n').filter(line => line.trim() !== '');
+                    lines.forEach(line => {
+                        const parts = line.split('\t');
+                        if (parts.length >= 3) {
+                            const videoId = parts[0];
+                            const date = parts[1];
+                            const title = parts[2];
+                            
+                            const videoItem = document.createElement('div');
+                            videoItem.className = 'video-item';
+                            videoItem.innerHTML = `
+                                <div class="player-wrapper">
+                                    <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
+                                </div>
+                                <div class="video-info">
+                                    <div class="video-title">${title}</div>
+                                    <div class="video-date">${date}</div>
+                                </div>
+                            `;
+                            container.appendChild(videoItem);
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('エラー:', error);
+                    container.innerHTML = `<p style="color: red;">${error.message}</p>`;
+                });
+        });
+    </script>
 
 </body>
 </html>
