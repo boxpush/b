@@ -2,149 +2,86 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>YouTubeプレイヤー一覧（タイトル付き）</title>
+<title>YouTube プレイヤー一覧</title>
 <style>
   body {
     font-family: sans-serif;
-    margin: 20px;
+    margin: 0;
+    padding: 20px;
+    background: #f4f4f4;
   }
-
-  #players-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    justify-content: center;
-  }
-
   .video-card {
-    width: 100%;
-    max-width: 560px;
-    flex: 1 1 300px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    padding: 10px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
   }
-.player-wrapper {
-  position: relative;
-  width: 100%;
-  background: #000;
-  touch-action: manipulation;
-  cursor: pointer;
-}
-
-.player-wrapper iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.player-wrapper.active iframe {
-  pointer-events: auto;
-}
-
   .video-info {
-    text-align: center;
-    margin-top: 6px;
+    padding: 5px 0;
   }
-
   .video-title {
+    font-size: 1.1em;
     font-weight: bold;
-    font-size: 1rem;
+    margin-bottom: 4px;
   }
-
   .video-date {
-    font-size: 0.85rem;
+    font-size: 0.9em;
     color: #666;
+  }
+  iframe {
+    width: 100%;
+    height: 315px; /* デフォルト16:9比率 */
+    max-width: 560px;
+    display: block;
+    margin: 0 auto;
   }
 </style>
 </head>
 <body>
 
-<h2>限定公開</h2>
+<h1>YouTube プレイヤー一覧</h1>
 <div id="players-container"></div>
 
 <script>
-  // YouTube IFrame API読み込み
-  var tag = document.createElement('script');
-  tag.src = "https://www.youtube.com/iframe_api";
-  var firstScriptTag = document.getElementsByTagName('script')[0];
-  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+fetch('id_title_unlisted.txt')
+  .then(res => res.text())
+  .then(text => {
+    const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+    const container = document.getElementById('players-container');
 
-  var players = [];
+    lines.forEach(line => {
+      const [id, date, title] = line.split('\t').map(s => s.trim());
 
-  // 動画データ読み込み
-  fetch('id_title_unlisted.txt')
-    .then(response => response.text())
-    .then(text => {
-      const videoData = text.split(/\r?\n/).map(line => {
-        const parts = line.split('\t');
-        return {
-          id: parts[0]?.trim() || '',
-          date: parts[1]?.trim() || '',
-          title: parts[2]?.trim() || ''
-        };
-      }).filter(item => item.id !== '');
+      // カード作成
+      const card = document.createElement('div');
+      card.className = 'video-card';
 
-      const container = document.getElementById('players-container');
+      // iframe生成
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`;
+      iframe.frameBorder = "0";
+      iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+      iframe.allowFullscreen = true;
 
-      videoData.forEach((data, index) => {
-        // カード要素
-        const card = document.createElement('div');
-        card.className = 'video-card';
+      // 情報
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'video-info';
+      infoDiv.innerHTML = `
+        <div class="video-title">${title}</div>
+        <div class="video-date">${date}</div>
+      `;
 
-        // プレイヤーラッパー
-        const wrapper = document.createElement('div');
-        wrapper.className = 'player-wrapper';
-        wrapper.id = 'player_' + index;
-
-        // 情報表示
-        const infoDiv = document.createElement('div');
-        infoDiv.className = 'video-info';
-        infoDiv.innerHTML = `
-          <div class="video-title">${data.title}</div>
-          <div class="video-date">${data.date}</div>
-        `;
-
-        card.appendChild(wrapper);
-        card.appendChild(infoDiv);
-        container.appendChild(card);
-
-        // タッチで再生開始
-        wrapper.addEventListener('click', () => {
-          if (!wrapper.classList.contains('active')) {
-            wrapper.classList.add('active');
-            players[index].playVideo();
-          }
-        });
-      });
-
-      window.videoData = videoData;
-      if (typeof onYouTubeIframeAPIReady === 'function') {
-        onYouTubeIframeAPIReady();
-      }
-    })
-    .catch(err => console.error('動画ID取得エラー:', err));
-
-  function onYouTubeIframeAPIReady() {
-    if (!window.videoData) return;
-    window.videoData.forEach((data, index) => {
-      players[index] = new YT.Player('player_' + index, {
-        videoId: data.id,
-        events: { 'onReady': onPlayerReady },
-        playerVars: {
-          rel: 0,
-          modestbranding: 1
-        }
-      });
+      card.appendChild(iframe);
+      card.appendChild(infoDiv);
+      container.appendChild(card);
     });
-  }
-
-  function onPlayerReady(event) {
-    // 初期は再生しない
-  }
+  })
+  .catch(err => console.error('読み込みエラー:', err));
 </script>
 
 </body>
 </html>
-
