@@ -33,7 +33,10 @@
   <div id="loading">読み込み中...</div>
   <table id="videoTable" style="display:none;">
     <thead>
-      <tr><th>タイトル</th></tr>
+      <tr>
+        <th>日時</th>
+        <th>タイトル</th>
+      </tr>
     </thead>
     <tbody></tbody>
   </table>
@@ -72,8 +75,15 @@
       const start = (page - 1) * PAGE_SIZE;
       const end = Math.min(start + PAGE_SIZE, data.length);
       for (let i = start; i < end; i++) {
-        const [videoId, title] = data[i];
+        const [videoId, date, title] = data[i];
         const tr = document.createElement('tr');
+
+        // 日時セル
+        const dateTd = document.createElement('td');
+        dateTd.textContent = date;
+        tr.appendChild(dateTd);
+
+        // タイトルセル
         const titleTd = document.createElement('td');
         const a = document.createElement('a');
         a.href = `https://www.youtube.com/watch?v=${videoId}`;
@@ -82,6 +92,7 @@
         a.textContent = title;
         titleTd.appendChild(a);
         tr.appendChild(titleTd);
+
         tbody.appendChild(tr);
       }
 
@@ -129,7 +140,7 @@
         alert('正規表現の構文エラーです');
         return;
       }
-      filteredVideos = videos.filter(([id, title]) => regex.test(title));
+      filteredVideos = videos.filter(([id, date, title]) => regex.test(title));
       renderPage(1);
     }
 
