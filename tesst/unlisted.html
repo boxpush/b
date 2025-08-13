@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>最近登録された限定公開</title>
+<title>YouTubeプレイヤー一覧（タイトル付き）</title>
 <style>
   body {
     font-family: sans-serif;
@@ -13,7 +13,7 @@
   #players-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 12px;
     justify-content: center;
   }
 
@@ -21,9 +21,11 @@
     position: relative;
     width: 100%;
     max-width: 560px;       /* 最大幅 */
-    padding-top: 0%;    /* 16:9比率 */
-    touch-action: manipulation; /* タップのみ受け付け、スクロール干渉回避 */
-    cursor: pointer;         /* タッチで操作可能なことを示す */
+    padding-top: 6.25%;    /* 16:9比率 */
+    touch-action: manipulation; 
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
   }
 
   .player-wrapper iframe {
@@ -32,17 +34,44 @@
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none; /* タッチ時はラッパーが受け取る */
+    pointer-events: none; /* タッチはラッパーが受け取る */
   }
 
   .player-wrapper.active iframe {
-    pointer-events: auto;  /* 再生開始後はiframeがタッチを受け取れる */
+    pointer-events: auto;
+  }
+
+  .video-info {
+    position: relative;
+    margin-top: calc(56.25% + 8px); /* iframeの下に余白 */
+    width: 100%;
+    text-align: center;
+  }
+
+  .video-title {
+    font-weight: bold;
+    font-size: 1rem;
+    margin: 4px 0;
+  }
+
+  .video-date {
+    font-size: 0.85rem;
+    color: #666;
+  }
+
+  @media (max-width: 600px) {
+    .player-wrapper {
+      padding-top: 50%;
+    }
+    .video-info {
+      margin-top: calc(50% + 6px);
+    }
   }
 </style>
 </head>
 <body>
 
-<h2>YouTubeプレイヤー一覧（レスポンシブ＋タッチ対応）</h2>
+<h2>YouTubeプレイヤー一覧（タイトル付き）</h2>
 <div id="players-container"></div>
 
 <script>
@@ -55,19 +84,34 @@
   var players = [];
 
   // 2. 動画IDテキストファイルを fetch
-  fetch('id_title_unlisted.txt')
+  fetch('video_ids.txt')
     .then(response => response.text())
     .then(text => {
-      const videoIds = text
-        .split(/\r?\n/)
-        .map(line => line.split('\t')[0])
-        .filter(id => id.trim() !== '');
+      // タブ区切りで動画ID, 日時, タイトルを取得
+      const videoData = text.split(/\r?\n/).map(line => {
+        const parts = line.split('\t');
+        return {
+          id: parts[0]?.trim() || '',
+          date: parts[1]?.trim() || '',
+          title: parts[2]?.trim() || ''
+        };
+      }).filter(item => item.id !== '');
 
       const container = document.getElementById('players-container');
-      videoIds.forEach((id, index) => {
+
+      videoData.forEach((data, index) => {
+        // プレイヤーラッパー
         const wrapper = document.createElement('div');
         wrapper.className = 'player-wrapper';
         wrapper.id = 'player_' + index;
+
+        // タイトル・日時表示
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'video-info';
+        infoDiv.innerHTML = `<div class="video-title">${data.title}</div>
+                             <div class="video-date">${data.date}</div>`;
+
+        wrapper.appendChild(infoDiv);
         container.appendChild(wrapper);
 
         // タッチで再生開始
@@ -78,24 +122,23 @@
           }
         });
       });
-      window.videoIds = videoIds;
+
+      window.videoData = videoData;
       if (typeof onYouTubeIframeAPIReady === 'function') {
         onYouTubeIframeAPIReady();
       }
     })
     .catch(err => console.error('動画ID取得エラー:', err));
 
-  // 3. IFrame API 準備完了時にプレイヤー生成
+  // 3. IFrame API準備完了でプレイヤー生成
   function onYouTubeIframeAPIReady() {
-    if (!window.videoIds) return;
-    window.videoIds.forEach((id, index) => {
+    if (!window.videoData) return;
+    window.videoData.forEach((data, index) => {
       players[index] = new YT.Player('player_' + index, {
-        videoId: id,
-        events: {
-          'onReady': onPlayerReady
-        },
+        videoId: data.id,
+        events: { 'onReady': onPlayerReady },
         playerVars: {
-          rel: 0,       // 関連動画非表示
+          rel: 0,
           modestbranding: 1
         }
       });
@@ -103,7 +146,7 @@
   }
 
   function onPlayerReady(event) {
-    // 初期状態では再生せず、タッチで再生する
+    // 初期状態では再生せず、タッチで再生
   }
 </script>
 
