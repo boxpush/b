@@ -114,7 +114,7 @@
         if (!res.ok) throw new Error('ファイルの読み込みに失敗しました');
         const text = await res.text();
         videos = parseTSV(text);
-        filteredVideos = [];
+        filteredVideos = null;
         document.getElementById('loading').style.display = 'none';
         document.getElementById('videoTable').style.display = '';
         document.getElementById('paginationTop').style.display = '';
