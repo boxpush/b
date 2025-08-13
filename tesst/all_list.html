@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>公開動画リスト</title>
+  <style>
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 4px; }
+    th { background: #eee; }
+    nav { margin: 10px 0; text-align: center; }
+    button { margin: 0 5px; }
+    #searchForm { text-align: center; margin: 10px 0; }
+    #searchForm input[type="text"] { width: 300px; padding: 5px; }
+  </style>
+</head>
+<body>
+  <h1>公開動画リスト</h1>
+
+  <div id="searchForm">
+    <input type="text" id="searchInput" placeholder="日時・タイトルを正規表現で検索" />
+    <button id="searchBtn">検索</button>
+    <button id="clearBtn">クリア</button>
+  </div>
+
+  <nav id="paginationTop" style="display:none;">
+    <button id="firstBtnTop" disabled>最初へ</button>
+    <button id="prevBtnTop" disabled>前へ</button>
+    <span id="pageInfoTop"></span>
+    <button id="nextBtnTop" disabled>次へ</button>
+    <button id="lastBtnTop" disabled>最後へ</button>
+  </nav>
+
+  <div id="loading">読み込み中...</div>
+  <table id="videoTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>日時</th>
+        <th>タイトル</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <nav id="paginationBottom" style="display:none;">
+    <button id="firstBtnBottom" disabled>最初へ</button>
+    <button id="prevBtnBottom" disabled>前へ</button>
+    <span id="pageInfoBottom"></span>
+    <button id="nextBtnBottom" disabled>次へ</button>
+    <button id="lastBtnBottom" disabled>最後へ</button>
+  </nav>
+
+  <script>
+    const CSV_URL = 'id_title_all.txt'; // 適宜変更
+    const PAGE_SIZE = 100;
+
+    let videos = [];
+    let filteredVideos = [];
+    let currentPage = 1;
+    let totalPages = 1;
+
+    function parseTSV(tsv) {
+      return tsv.trim().split('\n').map(line => line.split('\t'));
+    }
+
+    function renderPage(page) {
+      const tbody = document.querySelector('#videoTable tbody');
+      tbody.innerHTML = '';
+      const data = filteredVideos.length ? filteredVideos : videos;
+      totalPages = Math.ceil(data.length / PAGE_SIZE);
+      if(totalPages === 0) totalPages = 1;
+      if(page < 1) page = 1;
+      if(page > totalPages) page = totalPages;
+      currentPage = page;
+
+      const start = (page - 1) * PAGE_SIZE;
+      const end = Math.min(start + PAGE_SIZE, data.length);
+      for (let i = start; i < end; i++) {
+        const [videoId, date, title] = data[i];
+        const tr = document.createElement('tr');
+
+        // 日時セル
+        const dateTd = document.createElement('td');
+        dateTd.textContent = date;
+        tr.appendChild(dateTd);
+
+        // タイトルセル
+        const titleTd = document.createElement('td');
+        const a = document.createElement('a');
+        a.href = `https://www.youtube.com/watch?v=${videoId}`;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = title;
+        titleTd.appendChild(a);
+        tr.appendChild(titleTd);
+
+        tbody.appendChild(tr);
+      }
+
+      ['Top', 'Bottom'].forEach(pos => {
+        document.getElementById(`pageInfo${pos}`).textContent = `${currentPage} / ${totalPages}`;
+        document.getElementById(`prevBtn${pos}`).disabled = currentPage === 1;
+        document.getElementById(`nextBtn${pos}`).disabled = currentPage === totalPages;
+        document.getElementById(`firstBtn${pos}`).disabled = currentPage === 1;
+        document.getElementById(`lastBtn${pos}`).disabled = currentPage === totalPages;
+      });
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch(CSV_URL);
+        if (!res.ok) throw new Error('ファイルの読み込みに失敗しました');
+        const text = await res.text();
+        videos = parseTSV(text);
+        filteredVideos = [];
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('videoTable').style.display = '';
+        document.getElementById('paginationTop').style.display = '';
+        document.getElementById('paginationBottom').style.display = '';
+        renderPage(1);
+      } catch (e) {
+        document.getElementById('loading').textContent = e.message;
+      }
+    }
+
+    function goPage(newPage) {
+      renderPage(newPage);
+    }
+
+    function applyFilter() {
+      const pattern = document.getElementById('searchInput').value.trim();
+      if (!pattern) {
+        filteredVideos = [];
+        renderPage(1);
+        return;
+      }
+      let regex;
+      try {
+        regex = new RegExp(pattern, 'i');
+      } catch (e) {
+        alert('正規表現の構文エラーです');
+        return;
+      }
+      filteredVideos = videos.filter(([id, date, title]) => regex.test(date) || regex.test(title));
+      renderPage(1);
+    }
+
+    document.getElementById('searchBtn').addEventListener('click', applyFilter);
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      document.getElementById('searchInput').value = '';
+      filteredVideos = [];
+      renderPage(1);
+    });
+
+    ['Top', 'Bottom'].forEach(pos => {
+      document.getElementById(`prevBtn${pos}`).addEventListener('click', () => goPage(currentPage - 1));
+      document.getElementById(`nextBtn${pos}`).addEventListener('click', () => goPage(currentPage + 1));
+      document.getElementById(`firstBtn${pos}`).addEventListener('click', () => goPage(1));
+      document.getElementById(`lastBtn${pos}`).addEventListener('click', () => goPage(totalPages));
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
