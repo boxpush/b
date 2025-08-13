@@ -145,6 +145,12 @@
       renderPage(1);
     }
 
+    document.getElementById('searchInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('searchBtn').click();
+      }
+    });
     document.getElementById('searchBtn').addEventListener('click', applyFilter);
     document.getElementById('clearBtn').addEventListener('click', () => {
       document.getElementById('searchInput').value = '';
