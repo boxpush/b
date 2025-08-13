@@ -16,7 +16,9 @@
 </head>
 <body>
   <h1>全動画リスト</h1>
-
+  <p>
+  <div>Youtubeの雑な検索と違い,検索ワードに一致する結果しか出ません.</div>
+  </p>
   <div id="searchForm">
     <input type="text" id="searchInput" placeholder="日時・タイトルを正規表現で検索" />
     <button id="searchBtn">検索</button>
@@ -66,7 +68,7 @@
     function renderPage(page) {
       const tbody = document.querySelector('#videoTable tbody');
       tbody.innerHTML = '';
-      const data = filteredVideos.length ? filteredVideos : videos;
+      const data = (filteredVideos !== null) ? filteredVideos : videos;
       totalPages = Math.ceil(data.length / PAGE_SIZE);
       if(totalPages === 0) totalPages = 1;
       if(page < 1) page = 1;
@@ -130,7 +132,7 @@
     function applyFilter() {
       const pattern = document.getElementById('searchInput').value.trim();
       if (!pattern) {
-        filteredVideos = [];
+        filteredVideos = null;
         renderPage(1);
         return;
       }
@@ -154,7 +156,7 @@
     document.getElementById('searchBtn').addEventListener('click', applyFilter);
     document.getElementById('clearBtn').addEventListener('click', () => {
       document.getElementById('searchInput').value = '';
-      filteredVideos = [];
+      filteredVideos = null;
       renderPage(1);
     });
 
