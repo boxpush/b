@@ -5,49 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>直近の限定公開動画</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin: 20px 0;
+        }
         .container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
             padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
         .video-item {
-            display: flex;
-            flex-direction: column;
-            border: 1px solid #ccc;
+            background-color: #fff;
+            border: 1px solid #ddd;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none; /* アンカータグの下線を削除 */
+            color: inherit;
         }
-        .video-info {
-            padding: 10px;
-            background-color: #f9f9f9;
+        .video-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
         }
-        .video-title {
-            font-size: 1.2em;
-            margin-bottom: 5px;
-        }
-        .video-date {
-            font-size: 0.9em;
-            color: #666;
-        }
-        .player-wrapper {
+        .thumbnail-wrapper {
             position: relative;
             width: 100%;
             padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            overflow: hidden;
         }
-        .player-wrapper iframe {
+        .thumbnail-wrapper img {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            border: 0;
+            object-fit: cover;
+            display: block;
         }
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
+        .video-info {
+            padding: 15px;
+        }
+        .video-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .video-date {
+            font-size: 0.9em;
+            color: #666;
         }
     </style>
 </head>
@@ -71,6 +88,12 @@
                 })
                 .then(data => {
                     const lines = data.split('\n').filter(line => line.trim() !== '');
+                    
+                    if (lines.length === 0) {
+                        container.innerHTML = `<p style="text-align: center; color: #888;">表示する動画がありません。</p>`;
+                        return;
+                    }
+
                     lines.forEach(line => {
                         const parts = line.split('\t');
                         if (parts.length >= 3) {
@@ -78,11 +101,18 @@
                             const date = parts[1];
                             const title = parts[2];
                             
-                            const videoItem = document.createElement('div');
+                            const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                            const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+
+                            const videoItem = document.createElement('a');
                             videoItem.className = 'video-item';
+                            videoItem.href = videoUrl;
+                            videoItem.target = '_blank'; // 新しいタブで開く
+                            videoItem.rel = 'noopener noreferrer'; // セキュリティ対策
+
                             videoItem.innerHTML = `
-                                <div class="player-wrapper">
-                                    <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
+                                <div class="thumbnail-wrapper">
+                                    <img src="${thumbnailUrl}" alt="${title}">
                                 </div>
                                 <div class="video-info">
                                     <div class="video-title">${title}</div>
@@ -95,13 +125,9 @@
                 })
                 .catch(error => {
                     console.error('エラー:', error);
-                    container.innerHTML = `<p style="color: red;">${error.message}</p>`;
+                    container.innerHTML = `<p style="color: red; text-align: center;">${error.message}</p>`;
                 });
         });
     </script>
-
 </body>
 </html>
-
-
-
