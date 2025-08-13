@@ -2,11 +2,12 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>公開動画リスト</title>
+  <title>全動画リスト</title>
   <style>
-    table { border-collapse: collapse; width: 100%; }
+    table { border-collapse: collapse; width: 100%; table-layout: auto; }
     th, td { border: 1px solid #ccc; padding: 4px; }
     th { background: #eee; }
+    td:first-child, th:first-child { white-space: nowrap; width: 1%; }
     nav { margin: 10px 0; text-align: center; }
     button { margin: 0 5px; }
     #searchForm { text-align: center; margin: 10px 0; }
@@ -14,7 +15,7 @@
   </style>
 </head>
 <body>
-  <h1>公開動画リスト</h1>
+  <h1>全動画リスト</h1>
 
   <div id="searchForm">
     <input type="text" id="searchInput" placeholder="日時・タイトルを正規表現で検索" />
