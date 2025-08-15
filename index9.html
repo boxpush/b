@@ -131,6 +131,7 @@
     <span id="countdown"></span>
 </div>
 
+
 <script>
     const repo = "b"
     const startDate = new Date(2025, 7, 8); // 2025-08-08開始（0-basedなので7は8月）
@@ -239,12 +240,18 @@
     }
 
     document.getElementById('prev').onclick = () => {
-        offset = Math.max(0, offset - 1);
-        showImage();
+        const newOffset = Math.max(0, offset - 1);
+        if (newOffset !== offset) { // オフセットが変わった場合のみ再読み込み
+            offset = newOffset;
+            showImage();
+        }
     };
     document.getElementById('next').onclick = () => {
-        offset = Math.min(daysSinceStart, offset + 1);
-        showImage();
+        const newOffset = Math.min(daysSinceStart, offset + 1);
+        if (newOffset !== offset) { // オフセットが変わった場合のみ再読み込み
+            offset = newOffset;
+            showImage();
+        }
     };
 
     document.getElementById('dateInput').addEventListener('keydown', function(e) {
@@ -255,8 +262,10 @@
                 const m = parseInt(val.slice(4, 6), 10);
                 const d = parseInt(val.slice(6, 8), 10);
                 const inputDate = new Date(y, m - 1, d);
-                if (inputDate >= startDate && inputDate <= today) {
-                    offset = Math.floor((inputDate - startDate) / (1000 * 60 * 60 * 24));
+                const newOffset = Math.floor((inputDate - startDate) / (1000 * 60 * 60 * 24));
+                
+                if (inputDate >= startDate && inputDate <= today && newOffset !== offset) {
+                    offset = newOffset;
                     showImage();
                 }
             }
