@@ -119,7 +119,7 @@
         <img id="viewer" alt="画像">
     </a>
     <div id="loading-overlay"></div>
-    <div id="max-viewers">--:--&#9;-----</div>
+    <div id="max-viewers">--:--	-----</div>
 </div>
 
 <div class="controls">
@@ -168,16 +168,23 @@
             btn.classList.remove('inactive');
             btn.setAttribute('aria-pressed', 'true');
 
+            // 最初の画像更新をトリガー
             updateToToday(false);
 
             countdownSeconds = 300;
             countdownElem.textContent = `${countdownSeconds}`;
 
+            // 以前のインターバルが残っていないか確認
+            if (countdownIntervalId) {
+                clearInterval(countdownIntervalId);
+            }
+
             countdownIntervalId = setInterval(() => {
                 countdownSeconds--;
                 if (countdownSeconds <= 0) {
                     countdownSeconds = 300;
-                    updateToToday(false);
+                    // ここを false に変更して、ローディング画面を非表示にする
+                    updateToToday(false); 
                 }
                 countdownElem.textContent = `${countdownSeconds}`;
             }, 1000);
@@ -201,7 +208,8 @@
     function updateToToday(showLoading = true) {
         const today = new Date(new Date().getTime() - 10 * 60 * 1000);
         const newOffset = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-        if (newOffset !== offset) {
+        // オフセットが変わらなくても、強制的に画像表示を更新
+        if (newOffset !== offset || autoReload) {
             offset = newOffset;
             showImage(showLoading);
         }
