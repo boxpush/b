@@ -1,148 +1,312 @@
----
-layout: default
----
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Viewer</title>
+    <style>
+        body {
+            margin: 1em;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: white;
+            color: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
 
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: black;
+                color: white;
+            }
+        }
 
-<div style="text-align:center;">
-  <a id="imageLink" href="" target="_blank" rel="noopener noreferrer"
-     style="position: relative; display: inline-block;">
-    <img id="viewer" alt="画像"
-         style="max-height:80vh;">
-    <div id="max-viewers" style="
-      position: absolute;
-      top: 0;
-      right: 0;
-      color: black;
-      padding: 4px 8px;
-      font-size: 14px;
-      border-radius: 4px;
-      pointer-events: none;
-    ">--:--&#9;-----</div>
-  </a>
+        button, input[type="text"] {
+            margin: 0 8px;
+        }
+
+        #autoReloadBtn {
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            border: 1px solid #bbb;
+            background: #f0f0f0;
+            color: #222;
+            cursor: pointer;
+            transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s;
+        }
+
+        /* ON時の色（アクセント色） */
+        #autoReloadBtn.active {
+            background: #28a745;
+            border-color: #218838;
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(40,167,69,0.2);
+        }
+
+        /* OFF時の見た目（任意） */
+        #autoReloadBtn.inactive {
+            background: #f0f0f0;
+            border-color: #ccc;
+            color: #222;
+        }
+
+        /* フォーカス時のアクセシビリティ */
+        #autoReloadBtn:focus {
+            outline: 3px solid rgba(50,115,220,0.18);
+            outline-offset: 2px;
+        }
+
+        #viewer-container {
+            position: relative;
+            display: inline-block;
+            text-align: center;
+            max-width: 100%;
+            max-height: 80vh;
+        }
+
+        #viewer {
+            max-height: 80vh;
+            max-width: 100%;
+            display: block;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        #loading-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        #max-viewers {
+            position: absolute;
+            top: 0;
+            right: 0;
+            color: black;
+            padding: 4px 8px;
+            font-size: 14px;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="viewer-container">
+    <a id="imageLink" href="" target="_blank" rel="noopener noreferrer">
+        <img id="viewer" alt="画像">
+    </a>
+    <div id="loading-overlay"></div>
+    <div id="max-viewers">--:--&#9;-----</div>
 </div>
-<div style="text-align:center;">
-  <button onclick="location.href='https://boxpush.github.io/a/';">名前なし版</button>
-  <button id="prev">←</button>
-  <input type="text" id="dateInput" placeholder="yyyymmdd" style="font-size:1.2rem; width:120px; text-align:center;">
-  <button id="next">→</button>
-  <button id="autoReloadBtn">自動更新(5分毎): OFF</button>
-  <span id="countdown"></span>
+
+<div class="controls">
+    <button onclick="location.href='https://boxpush.github.io/a/';">名前なし版</button>
+    <button id="prev">←</button>
+    <input type="text" id="dateInput" placeholder="yyyymmdd" style="font-size:1.2rem; width:120px; text-align:center;">
+    <button id="next">→</button>
+    <button id="autoReloadBtn">自動更新(5分毎): OFF</button>
+    <span id="countdown"></span>
 </div>
+
 <script>
-  const repo = "b"
-  const startDate = new Date(2025, 7, 8); // 2025-08-08開始（0-basedなので7は8月）
-  const today = new Date(new Date().getTime() - 10 * 60 * 1000);
-  const daysSinceStart = Math.floor((today - startDate) / (1000*60*60*24));
-  let offset = daysSinceStart;
+    const repo = "b"
+    const startDate = new Date(2025, 7, 8); // 2025-08-08開始（0-basedなので7は8月）
+    let offset; 
 
-  let autoReload = false;
-  let countdownSeconds = 300;
-  let countdownIntervalId = null;
+    let autoReload = false;
+    let countdownSeconds = 300;
+    let countdownIntervalId = null;
 
-  const img = document.getElementById('viewer');
-  const btn = document.getElementById('autoReloadBtn');
-  const countdownElem = document.getElementById('countdown');
+    const img = document.getElementById('viewer');
+    const btn = document.getElementById('autoReloadBtn');
+    const countdownElem = document.getElementById('countdown');
+    const loadingOverlay = document.getElementById('loading-overlay');
 
-  // 初期状態に合わせてクラスをセット（autoReload が既にあるならそれを使う）
-  btn.classList.toggle('active', autoReload);
-  btn.classList.toggle('inactive', !autoReload);
-  btn.setAttribute('aria-pressed', String(autoReload)); // 画面リーダー対応
-
-  btn.addEventListener('click', () => {
-    autoReload = !autoReload;
-
-    if (autoReload) {
-      btn.textContent = '自動更新(5分毎): ON';
-      btn.classList.add('active');
-      btn.classList.remove('inactive');
-      btn.setAttribute('aria-pressed', 'true');
-
-      countdownSeconds = 300;
-      countdownElem.textContent = `${countdownSeconds}`;
-
-      countdownIntervalId = setInterval(() => {
-        countdownSeconds--;
-        if (countdownSeconds <= 0) {
-          countdownSeconds = 300;
-          showImage();
+    // オートリロードをオフにする共通関数
+    function disableAutoReload() {
+        if (autoReload) {
+            autoReload = false;
+            btn.textContent = '自動更新(5分毎): OFF';
+            btn.classList.remove('active');
+            btn.classList.add('inactive');
+            btn.setAttribute('aria-pressed', 'false');
+            clearInterval(countdownIntervalId);
+            countdownIntervalId = null;
+            countdownElem.textContent = '';
         }
-        countdownElem.textContent = `${countdownSeconds}`;
-      }, 1000);
-    } else {
-      btn.textContent = '自動更新(5分毎): OFF';
-      btn.classList.remove('active');
-      btn.classList.add('inactive');
-      btn.setAttribute('aria-pressed', 'false');
-
-      clearInterval(countdownIntervalId);
-      countdownIntervalId = null;
-      countdownElem.textContent = '';
     }
-  });
+    
+    // 自動更新をオンにする共通関数
+    function enableAutoReload() {
+        if (!autoReload) {
+            autoReload = true;
+            btn.textContent = '自動更新(5分毎): ON';
+            btn.classList.add('active');
+            btn.classList.remove('inactive');
+            btn.setAttribute('aria-pressed', 'true');
 
-  function getDateString(daysFromStart) {
-    const d = new Date(startDate);
-    d.setDate(d.getDate() + daysFromStart);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}${m}${day}`;
-  }
+            updateToToday(false);
 
-  function showImage() {
-    const base = "https://f005.backblazeb2.com/file/boxpush/";
-    const imgSrc = base + getDateString(offset) + repo + ".png";
-    const txtSrc = "https://raw.githubusercontent.com/boxpush/" + repo + "/main/txt/" + getDateString(offset) + ".txt";
-    const viewer = document.getElementById('viewer');
-    viewer.src = imgSrc + '?t=' + new Date().getTime();
+            countdownSeconds = 300;
+            countdownElem.textContent = `${countdownSeconds}`;
 
-    // リンクのhrefにも画像URLをセット
-    document.getElementById('imageLink').href = imgSrc;
-
-    // フォームにも日付を反映
-    const d = new Date(startDate);
-    d.setDate(d.getDate() + offset);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    document.getElementById('dateInput').value = `${y}${m}${day}`;
-    fetch(txtSrc + '?t=' + new Date().getTime())
-      .then(response => {
-        if (!response.ok) throw new Error('');
-        return response.text();
-      })
-      .then(text => {
-        document.getElementById('max-viewers').textContent = text;
-      })
-      .catch(error => {
-        document.getElementById('max-viewers').textContent = '';
-      });
-  }
-
-  document.getElementById('prev').onclick = () => {
-    offset = Math.max(0, offset - 1);
-    showImage();
-  };
-  document.getElementById('next').onclick = () => {
-    offset = Math.min(daysSinceStart, offset + 1);
-    showImage();
-  };
-
-  document.getElementById('dateInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-      const val = this.value.trim();
-      if (/^\d{8}$/.test(val)) {
-        const y = parseInt(val.slice(0,4),10);
-        const m = parseInt(val.slice(4,6),10);
-        const d = parseInt(val.slice(6,8),10);
-        const inputDate = new Date(y, m-1, d);
-        if (inputDate >= startDate && inputDate <= today) {
-          offset = Math.floor((inputDate - startDate) / (1000*60*60*24));
-          showImage();
+            countdownIntervalId = setInterval(() => {
+                countdownSeconds--;
+                if (countdownSeconds <= 0) {
+                    countdownSeconds = 300;
+                    updateToToday(false);
+                }
+                countdownElem.textContent = `${countdownSeconds}`;
+            }, 1000);
         }
-      }
     }
-  });
 
-  showImage();
+    // 初期状態に合わせてクラスをセット（autoReload が既にあるならそれを使う）
+    btn.classList.toggle('active', autoReload);
+    btn.classList.toggle('inactive', !autoReload);
+    btn.setAttribute('aria-pressed', String(autoReload)); // 画面リーダー対応
+
+    // イベントリスナーを一度だけ登録
+    btn.addEventListener('click', () => {
+        if (autoReload) {
+            disableAutoReload();
+        } else {
+            enableAutoReload();
+        }
+    });
+
+    function updateToToday(showLoading = true) {
+        const today = new Date(new Date().getTime() - 10 * 60 * 1000);
+        const newOffset = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+        if (newOffset !== offset) {
+            offset = newOffset;
+            showImage(showLoading);
+        }
+    }
+
+    function getDateString(daysFromStart) {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + daysFromStart);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}${m}${day}`;
+    }
+
+    function showImage(showLoading = true) {
+        if (showLoading) {
+            loadingOverlay.style.display = 'block';
+            img.style.opacity = '0';
+        }
+
+        const base = "https://f005.backblazeb2.com/file/boxpush/";
+        const imgSrc = base + getDateString(offset) + repo + ".png";
+        const txtSrc = "https://raw.githubusercontent.com/boxpush/" + repo + "/main/txt/" + getDateString(offset) + ".txt";
+
+        document.getElementById('imageLink').href = imgSrc;
+
+        const newImg = new Image();
+        newImg.onload = () => {
+            img.src = newImg.src;
+            if (showLoading) {
+                loadingOverlay.style.display = 'none';
+                img.style.opacity = '1';
+            }
+        };
+        newImg.onerror = () => {
+            if (showLoading) {
+                loadingOverlay.style.display = 'none';
+                img.style.opacity = '0';
+            }
+            console.error('画像の読み込みに失敗しました');
+        };
+        newImg.src = imgSrc + '?t=' + new Date().getTime();
+
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + offset);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        document.getElementById('dateInput').value = `${y}${m}${day}`;
+
+        fetch(txtSrc + '?t=' + new Date().getTime())
+            .then(response => {
+                if (!response.ok) throw new Error('');
+                return response.text();
+            })
+            .then(text => {
+                document.getElementById('max-viewers').textContent = text;
+            })
+            .catch(error => {
+                document.getElementById('max-viewers').textContent = '';
+            });
+    }
+
+    document.getElementById('prev').onclick = () => {
+        const newOffset = Math.max(0, offset - 1);
+        if (newOffset !== offset) {
+            offset = newOffset;
+            disableAutoReload();
+            showImage();
+        }
+    };
+    document.getElementById('next').onclick = () => {
+        const today = new Date(new Date().getTime() - 10 * 60 * 1000);
+        const daysSinceStart = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+        const newOffset = Math.min(daysSinceStart, offset + 1);
+        if (newOffset !== offset) {
+            offset = newOffset;
+            disableAutoReload();
+            showImage();
+        }
+    };
+
+    document.getElementById('dateInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const val = this.value.trim();
+            if (/^\d{8}$/.test(val)) {
+                const y = parseInt(val.slice(0, 4), 10);
+                const m = parseInt(val.slice(4, 6), 10);
+                const d = parseInt(val.slice(6, 8), 10);
+                const inputDate = new Date(y, m - 1, d);
+                const today = new Date(new Date().getTime() - 10 * 60 * 1000);
+                const newOffset = Math.floor((inputDate - startDate) / (1000 * 60 * 60 * 24));
+                
+                if (inputDate >= startDate && inputDate <= today && newOffset !== offset) {
+                    offset = newOffset;
+                    disableAutoReload();
+                    showImage();
+                }
+            }
+        }
+    });
+
+    const initialToday = new Date(new Date().getTime() - 10 * 60 * 1000);
+    offset = Math.floor((initialToday - startDate) / (1000 * 60 * 60 * 24));
+    showImage();
 </script>
+</body>
+</html>
