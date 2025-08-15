@@ -306,5 +306,184 @@
     offset = Math.floor((initialToday - startDate) / (1000 * 60 * 60 * 24));
     showImage(); // ← 初回ロード時はローディングを表示
 </script>
+
+
+<script>
+    const repo = "b"
+    const startDate = new Date(2025, 7, 8); // 2025-08-08開始（0-basedなので7は8月）
+    let offset; 
+
+    let autoReload = false;
+    let countdownSeconds = 300;
+    let countdownIntervalId = null;
+
+    const img = document.getElementById('viewer');
+    const btn = document.getElementById('autoReloadBtn');
+    const countdownElem = document.getElementById('countdown');
+    const loadingOverlay = document.getElementById('loading-overlay');
+
+    // オートリロードをオフにする共通関数
+    function disableAutoReload() {
+        if (autoReload) {
+            autoReload = false;
+            btn.textContent = '自動更新(5分毎): OFF';
+            btn.classList.remove('active');
+            btn.classList.add('inactive');
+            btn.setAttribute('aria-pressed', 'false');
+            clearInterval(countdownIntervalId);
+            countdownIntervalId = null;
+            countdownElem.textContent = '';
+        }
+    }
+    
+    // 自動更新をオンにする共通関数
+    function enableAutoReload() {
+        if (!autoReload) {
+            autoReload = true;
+            btn.textContent = '自動更新(5分毎): ON';
+            btn.classList.add('active');
+            btn.classList.remove('inactive');
+            btn.setAttribute('aria-pressed', 'true');
+
+            updateToToday(false);
+
+            countdownSeconds = 300;
+            countdownElem.textContent = `${countdownSeconds}`;
+
+            countdownIntervalId = setInterval(() => {
+                countdownSeconds--;
+                if (countdownSeconds <= 0) {
+                    countdownSeconds = 300;
+                    updateToToday(false);
+                }
+                countdownElem.textContent = `${countdownSeconds}`;
+            }, 1000);
+        }
+    }
+
+    // 初期状態に合わせてクラスをセット（autoReload が既にあるならそれを使う）
+    btn.classList.toggle('active', autoReload);
+    btn.classList.toggle('inactive', !autoReload);
+    btn.setAttribute('aria-pressed', String(autoReload)); // 画面リーダー対応
+
+    // イベントリスナーを一度だけ登録
+    btn.addEventListener('click', () => {
+        if (autoReload) {
+            disableAutoReload();
+        } else {
+            enableAutoReload();
+        }
+    });
+
+    function updateToToday(showLoading = true) {
+        const today = new Date(new Date().getTime() - 10 * 60 * 1000);
+        const newOffset = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+        if (newOffset !== offset) {
+            offset = newOffset;
+            showImage(showLoading);
+        }
+    }
+
+    function getDateString(daysFromStart) {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + daysFromStart);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}${m}${day}`;
+    }
+
+    function showImage(showLoading = true) {
+        if (showLoading) {
+            loadingOverlay.style.display = 'block';
+            img.style.opacity = '0';
+        }
+
+        const base = "https://f005.backblazeb2.com/file/boxpush/";
+        const imgSrc = base + getDateString(offset) + repo + ".png";
+        const txtSrc = "https://raw.githubusercontent.com/boxpush/" + repo + "/main/txt/" + getDateString(offset) + ".txt";
+
+        document.getElementById('imageLink').href = imgSrc;
+
+        const newImg = new Image();
+        newImg.onload = () => {
+            img.src = newImg.src;
+            if (showLoading) {
+                loadingOverlay.style.display = 'none';
+                img.style.opacity = '1';
+            }
+        };
+        newImg.onerror = () => {
+            if (showLoading) {
+                loadingOverlay.style.display = 'none';
+                img.style.opacity = '0';
+            }
+            console.error('画像の読み込みに失敗しました');
+        };
+        newImg.src = imgSrc + '?t=' + new Date().getTime();
+
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + offset);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        document.getElementById('dateInput').value = `${y}${m}${day}`;
+
+        fetch(txtSrc + '?t=' + new Date().getTime())
+            .then(response => {
+                if (!response.ok) throw new Error('');
+                return response.text();
+            })
+            .then(text => {
+                document.getElementById('max-viewers').textContent = text;
+            })
+            .catch(error => {
+                document.getElementById('max-viewers').textContent = '';
+            });
+    }
+
+    document.getElementById('prev').onclick = () => {
+        const newOffset = Math.max(0, offset - 1);
+        if (newOffset !== offset) {
+            offset = newOffset;
+            disableAutoReload();
+            showImage();
+        }
+    };
+    document.getElementById('next').onclick = () => {
+        const today = new Date(new Date().getTime() - 10 * 60 * 1000);
+        const daysSinceStart = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+        const newOffset = Math.min(daysSinceStart, offset + 1);
+        if (newOffset !== offset) {
+            offset = newOffset;
+            disableAutoReload();
+            showImage();
+        }
+    };
+
+    document.getElementById('dateInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const val = this.value.trim();
+            if (/^\d{8}$/.test(val)) {
+                const y = parseInt(val.slice(0, 4), 10);
+                const m = parseInt(val.slice(4, 6), 10);
+                const d = parseInt(val.slice(6, 8), 10);
+                const inputDate = new Date(y, m - 1, d);
+                const today = new Date(new Date().getTime() - 10 * 60 * 1000);
+                const newOffset = Math.floor((inputDate - startDate) / (1000 * 60 * 60 * 24));
+                
+                if (inputDate >= startDate && inputDate <= today && newOffset !== offset) {
+                    offset = newOffset;
+                    disableAutoReload();
+                    showImage();
+                }
+            }
+        }
+    });
+
+    const initialToday = new Date(new Date().getTime() - 10 * 60 * 1000);
+    offset = Math.floor((initialToday - startDate) / (1000 * 60 * 60 * 24));
+    showImage();
+</script>
 </body>
 </html>
