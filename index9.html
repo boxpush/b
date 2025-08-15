@@ -1,0 +1,12 @@
+-        if (countdownSeconds <= 0) {
+-          countdownSeconds = 300;
+-          showImage();
+-        }
++        if (countdownSeconds <= 0) {
++          countdownSeconds = 300;
++          // 最新のtodayに合わせてoffsetを更新
++          const latestToday = new Date(new Date().getTime() - 10 * 60 * 1000);
++          const latestDays = Math.floor((latestToday - startDate) / (1000*60*60*24));
++          offset = Math.min(offset, latestDays);
++          showImage();
++        }
