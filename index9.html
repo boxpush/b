@@ -130,13 +130,10 @@
     <button id="autoReloadBtn">自動更新(5分毎): OFF</button>
     <span id="countdown"></span>
 </div>
-
 <script>
     const repo = "b"
     const startDate = new Date(2025, 7, 8); // 2025-08-08開始（0-basedなので7は8月）
-    const today = new Date(new Date().getTime() - 10 * 60 * 1000);
-    const daysSinceStart = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-    let offset = daysSinceStart;
+    let offset; // オフセットの初期化を showImage() に移動
 
     let autoReload = false;
     let countdownSeconds = 300;
@@ -175,6 +172,9 @@
             btn.classList.remove('inactive');
             btn.setAttribute('aria-pressed', 'true');
 
+            // 自動更新がオンになったら、まず現在日に更新して画像を表示
+            updateToToday();
+            
             countdownSeconds = 300;
             countdownElem.textContent = `${countdownSeconds}`;
 
@@ -182,7 +182,7 @@
                 countdownSeconds--;
                 if (countdownSeconds <= 0) {
                     countdownSeconds = 300;
-                    showImage();
+                    updateToToday(); // ← 修正箇所
                 }
                 countdownElem.textContent = `${countdownSeconds}`;
             }, 1000);
@@ -190,6 +190,16 @@
             disableAutoReload();
         }
     });
+
+    // 日付を現在日に更新する関数を追加
+    function updateToToday() {
+        const today = new Date(new Date().getTime() - 10 * 60 * 1000);
+        const newOffset = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+        if (newOffset !== offset) {
+            offset = newOffset;
+            showImage();
+        }
+    }
 
     function getDateString(daysFromStart) {
         const d = new Date(startDate);
@@ -249,15 +259,15 @@
         const newOffset = Math.max(0, offset - 1);
         if (newOffset !== offset) {
             offset = newOffset;
-            disableAutoReload(); // ← 変更箇所
+            disableAutoReload();
             showImage();
         }
     };
     document.getElementById('next').onclick = () => {
-        const newOffset = Math.min(daysSinceStart, offset + 1);
+        const newOffset = Math.min(Math.floor((new Date(new Date().getTime() - 10 * 60 * 1000) - startDate) / (1000 * 60 * 60 * 24)), offset + 1); // ← 修正箇所
         if (newOffset !== offset) {
             offset = newOffset;
-            disableAutoReload(); // ← 変更箇所
+            disableAutoReload();
             showImage();
         }
     };
@@ -270,19 +280,22 @@
                 const m = parseInt(val.slice(4, 6), 10);
                 const d = parseInt(val.slice(6, 8), 10);
                 const inputDate = new Date(y, m - 1, d);
+                const today = new Date(new Date().getTime() - 10 * 60 * 1000); // ← 追加
                 const newOffset = Math.floor((inputDate - startDate) / (1000 * 60 * 60 * 24));
                 
                 if (inputDate >= startDate && inputDate <= today && newOffset !== offset) {
                     offset = newOffset;
-                    disableAutoReload(); // ← 変更箇所
+                    disableAutoReload();
                     showImage();
                 }
             }
         }
     });
 
+    // 初回ロード時のオフセットを計算
+    const initialToday = new Date(new Date().getTime() - 10 * 60 * 1000);
+    offset = Math.floor((initialToday - startDate) / (1000 * 60 * 60 * 24));
     showImage();
 </script>
-
 </body>
 </html>
