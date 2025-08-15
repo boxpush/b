@@ -131,7 +131,6 @@
     <span id="countdown"></span>
 </div>
 
-
 <script>
     const repo = "b"
     const startDate = new Date(2025, 7, 8); // 2025-08-08開始（0-basedなので7は8月）
@@ -147,6 +146,20 @@
     const btn = document.getElementById('autoReloadBtn');
     const countdownElem = document.getElementById('countdown');
     const loadingOverlay = document.getElementById('loading-overlay');
+
+    // オートリロードをオフにする共通関数
+    function disableAutoReload() {
+        if (autoReload) {
+            autoReload = false;
+            btn.textContent = '自動更新(5分毎): OFF';
+            btn.classList.remove('active');
+            btn.classList.add('inactive');
+            btn.setAttribute('aria-pressed', 'false');
+            clearInterval(countdownIntervalId);
+            countdownIntervalId = null;
+            countdownElem.textContent = '';
+        }
+    }
 
     // 初期状態に合わせてクラスをセット（autoReload が既にあるならそれを使う）
     btn.classList.toggle('active', autoReload);
@@ -174,14 +187,7 @@
                 countdownElem.textContent = `${countdownSeconds}`;
             }, 1000);
         } else {
-            btn.textContent = '自動更新(5分毎): OFF';
-            btn.classList.remove('active');
-            btn.classList.add('inactive');
-            btn.setAttribute('aria-pressed', 'false');
-
-            clearInterval(countdownIntervalId);
-            countdownIntervalId = null;
-            countdownElem.textContent = '';
+            disableAutoReload();
         }
     });
 
@@ -241,15 +247,17 @@
 
     document.getElementById('prev').onclick = () => {
         const newOffset = Math.max(0, offset - 1);
-        if (newOffset !== offset) { // オフセットが変わった場合のみ再読み込み
+        if (newOffset !== offset) {
             offset = newOffset;
+            disableAutoReload(); // ← 変更箇所
             showImage();
         }
     };
     document.getElementById('next').onclick = () => {
         const newOffset = Math.min(daysSinceStart, offset + 1);
-        if (newOffset !== offset) { // オフセットが変わった場合のみ再読み込み
+        if (newOffset !== offset) {
             offset = newOffset;
+            disableAutoReload(); // ← 変更箇所
             showImage();
         }
     };
@@ -266,6 +274,7 @@
                 
                 if (inputDate >= startDate && inputDate <= today && newOffset !== offset) {
                     offset = newOffset;
+                    disableAutoReload(); // ← 変更箇所
                     showImage();
                 }
             }
