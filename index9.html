@@ -29,6 +29,7 @@ layout: default
 </div>
 <script>
   const repo = "b"
+  const loadingImg = "https://i.gifer.com/ZZ5H.gif"; // ローディングGIFのURL
   const startDate = new Date(2025, 7, 8); // 2025-08-08開始（0-basedなので7は8月）
   let today = new Date(new Date().getTime() - 10 * 60 * 1000);
   let daysSinceStart = Math.floor((today - startDate) / (1000*60*60*24));
@@ -107,6 +108,10 @@ layout: default
   }
 
   function showImage() {
+    // ボタン押下・日付入力時に一旦ローディング表示
+    img.src = loadingImg;
+    document.getElementById('max-viewers').textContent = '';
+
     // 自動更新時にtodayを最新に更新
     today = new Date(new Date().getTime() - 10 * 60 * 1000);
     daysSinceStart = Math.floor((today - startDate) / (1000*60*60*24));
