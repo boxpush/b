@@ -183,7 +183,8 @@
                 countdownSeconds--;
                 if (countdownSeconds <= 0) {
                     countdownSeconds = 300;
-                    updateToToday(true); // showLoadingをtrueに変更
+                    // ここを false に変更して、ローディング画面を非表示にする
+                    updateToToday(false); 
                 }
                 countdownElem.textContent = `${countdownSeconds}`;
             }, 1000);
