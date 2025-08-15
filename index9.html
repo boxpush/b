@@ -120,9 +120,14 @@ layout: default
     const base = "https://f005.backblazeb2.com/file/boxpush/";
     const imgSrc = base + getDateString(offset) + repo + ".png";
     const txtSrc = "https://raw.githubusercontent.com/boxpush/" + repo + "/main/txt/" + getDateString(offset) + ".txt";
-    img.src = imgSrc + '?t=' + new Date().getTime();
-    document.getElementById('imageLink').href = imgSrc;
+    // 新しいImageオブジェクトでロード
+    const fullImg = new Image();
+    fullImg.src = imgSrc + '?t=' + new Date().getTime();
+    fullImg.onload = () => {
+      img.src = fullImg.src; // ローディングが完了したら差し替え
+    };
 
+  document.getElementById('imageLink').href = imgSrc;    
     const d = new Date(startDate);
     d.setDate(d.getDate() + offset);
     const y = d.getFullYear();
