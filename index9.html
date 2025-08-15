@@ -66,11 +66,13 @@
             max-width: 100%;
             max-height: 80vh;
         }
-        
+
         #viewer {
             max-height: 80vh;
             max-width: 100%;
             display: block;
+            opacity: 1;
+            transition: opacity 0.3s ease;
         }
 
         #loading-overlay {
@@ -103,7 +105,7 @@
             border-radius: 4px;
             pointer-events: none;
         }
-        
+
         .controls {
             margin-top: 20px;
             text-align: center;
@@ -194,25 +196,24 @@
     function showImage() {
         // ローディングアニメーションを表示
         loadingOverlay.style.display = 'block';
-        img.style.display = 'none';
+        img.style.opacity = '0'; // 画像を非表示にする（opacityでアニメーションさせる）
 
         const base = "https://f005.backblazeb2.com/file/boxpush/";
         const imgSrc = base + getDateString(offset) + repo + ".png";
         const txtSrc = "https://raw.githubusercontent.com/boxpush/" + repo + "/main/txt/" + getDateString(offset) + ".txt";
-        
+
         document.getElementById('imageLink').href = imgSrc;
-        
+
         // 新しいImageオブジェクトを作成してロードイベントをリッスン
         const newImg = new Image();
         newImg.onload = () => {
             img.src = newImg.src;
             loadingOverlay.style.display = 'none';
-            img.style.display = 'block';
+            img.style.opacity = '1'; // 画像をフェードイン
         };
         newImg.onerror = () => {
             loadingOverlay.style.display = 'none';
-            img.style.display = 'none';
-            // エラー表示など、必要に応じて
+            img.style.opacity = '0'; // エラー時もopacityを0に
             console.error('画像の読み込みに失敗しました');
         };
         newImg.src = imgSrc + '?t=' + new Date().getTime();
