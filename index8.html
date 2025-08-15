@@ -194,7 +194,7 @@
 
     // 日付を現在日に更新する関数を追加
     function updateToToday(showLoading = true) { // ← 引数を追加
-        const today = new Date(new Date().getTime() + 20 * 60 * 1000);
+        const today = new Date(new Date().getTime() - 10 * 60 * 1000);
         const newOffset = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
         if (newOffset !== offset) {
             offset = newOffset;
@@ -469,7 +469,7 @@
                 const m = parseInt(val.slice(4, 6), 10);
                 const d = parseInt(val.slice(6, 8), 10);
                 const inputDate = new Date(y, m - 1, d);
-                const today = new Date(new Date().getTime() - 10 * 60 * 1000);
+                const today = new Date(new Date().getTime() + 20 * 60 * 1000);
                 const newOffset = Math.floor((inputDate - startDate) / (1000 * 60 * 60 * 24));
                 
                 if (inputDate >= startDate && inputDate <= today && newOffset !== offset) {
