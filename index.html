@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>no title</title>
+    <title>Image Viewer</title>
     <style>
         body {
             margin: 1em;
@@ -38,7 +38,6 @@
             transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s;
         }
 
-        /* ON時の色（アクセント色） */
         #autoReloadBtn.active {
             background: #28a745;
             border-color: #218838;
@@ -46,14 +45,12 @@
             box-shadow: 0 2px 6px rgba(40,167,69,0.2);
         }
 
-        /* OFF時の見た目（任意） */
         #autoReloadBtn.inactive {
             background: #f0f0f0;
             border-color: #ccc;
             color: #222;
         }
 
-        /* フォーカス時のアクセシビリティ */
         #autoReloadBtn:focus {
             outline: 3px solid rgba(50,115,220,0.18);
             outline-offset: 2px;
@@ -124,9 +121,11 @@
 
 <div class="controls">
     <button onclick="location.href='https://boxpush.github.io/a/';">名前なし版</button>
-    <button id="prev">←</button>
+    <button id="jumpToStart">≪</button>
+    <button id="prev">&lt;</button>
     <input type="text" id="dateInput" placeholder="yyyymmdd" style="font-size:1.2rem; width:120px; text-align:center;">
-    <button id="next">→</button>
+    <button id="next">&gt;</button>
+    <button id="jumpToEnd">≫</button>
     <button id="autoReloadBtn">自動更新(5分毎): OFF</button>
     <span id="countdown"></span>
 </div>
@@ -145,7 +144,6 @@
     const countdownElem = document.getElementById('countdown');
     const loadingOverlay = document.getElementById('loading-overlay');
 
-    // オートリロードをオフにする共通関数
     function disableAutoReload() {
         if (autoReload) {
             autoReload = false;
@@ -159,7 +157,6 @@
         }
     }
     
-    // 自動更新をオンにする共通関数
     function enableAutoReload() {
         if (!autoReload) {
             autoReload = true;
@@ -168,13 +165,11 @@
             btn.classList.remove('inactive');
             btn.setAttribute('aria-pressed', 'true');
 
-            // 最初の画像更新をトリガー
             updateToToday(false);
 
             countdownSeconds = 300;
             countdownElem.textContent = `${countdownSeconds}`;
 
-            // 以前のインターバルが残っていないか確認
             if (countdownIntervalId) {
                 clearInterval(countdownIntervalId);
             }
@@ -183,7 +178,6 @@
                 countdownSeconds--;
                 if (countdownSeconds <= 0) {
                     countdownSeconds = 300;
-                    // ここを false に変更して、ローディング画面を非表示にする
                     updateToToday(false); 
                 }
                 countdownElem.textContent = `${countdownSeconds}`;
@@ -191,12 +185,10 @@
         }
     }
 
-    // 初期状態に合わせてクラスをセット（autoReload が既にあるならそれを使う）
     btn.classList.toggle('active', autoReload);
     btn.classList.toggle('inactive', !autoReload);
-    btn.setAttribute('aria-pressed', String(autoReload)); // 画面リーダー対応
+    btn.setAttribute('aria-pressed', String(autoReload));
 
-    // イベントリスナーを一度だけ登録
     btn.addEventListener('click', () => {
         if (autoReload) {
             disableAutoReload();
@@ -208,7 +200,6 @@
     function updateToToday(showLoading = true) {
         const today = new Date(new Date().getTime() - 10 * 60 * 1000);
         const newOffset = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-        // オフセットが変わらなくても、強制的に画像表示を更新
         if (newOffset !== offset || autoReload) {
             offset = newOffset;
             showImage(showLoading);
@@ -291,6 +282,20 @@
             showImage();
         }
     };
+
+    document.getElementById('jumpToStart').onclick = () => {
+        offset = 0;
+        disableAutoReload();
+        showImage();
+    };
+
+    document.getElementById('jumpToEnd').onclick = () => {
+        const today = new Date(new Date().getTime() - 10 * 60 * 1000);
+        offset = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+        disableAutoReload();
+        showImage();
+    };
+
 
     document.getElementById('dateInput').addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
