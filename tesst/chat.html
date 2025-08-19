@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ログ検索フォーム</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; }
+    textarea { width: 100%; height: 300px; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>ログ検索フォーム</h1>
+  <form id="searchForm">
+    <input type="text" id="keywords" placeholder="キーワードをカンマ区切りで入力" size="50">
+    <button type="submit">検索</button>
+  </form>
+
+  <textarea id="result" readonly placeholder="検索結果がここに表示されます"></textarea>
+
+  <script>
+    const form = document.getElementById('searchForm');
+    const resultArea = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault(); // フォーム送信をキャンセル
+
+      const keywords = encodeURIComponent(document.getElementById('keywords').value.trim());
+      if (!keywords) {
+        resultArea.value = "キーワードを入力してください";
+        return;
+      }
+
+      const url = `https://boxpush.d4df816be9225fab.workers.dev/chat?keywords=${keywords}`;
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP エラー: ${response.status}`);
+
+        const data = await response.json();
+        // JSON を整形して表示
+        resultArea.value = JSON.stringify(data, null, 2);
+
+      } catch (err) {
+        resultArea.value = `エラー: ${err.message}`;
+      }
+    });
+  </script>
+</body>
+</html>
