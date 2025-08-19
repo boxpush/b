@@ -51,123 +51,103 @@
     <button id="nextBtnBottom" disabled>次へ</button>
     <button id="lastBtnBottom" disabled>最後へ</button>
   </nav>
-
-  <script>
-    const CSV_URL = 'id_title_all.txt'; // 適宜変更
-    const PAGE_SIZE = 100;
-
-    let videos = [];
-    let filteredVideos = [];
-    let currentPage = 1;
-    let totalPages = 1;
-
-    function parseTSV(tsv) {
-      return tsv.trim().split('\n').map(line => line.split('\t'));
+<script>
+  const PAGE_SIZE = 100;
+  
+  let videos = [];
+  let filteredVideos = [];
+  let currentPage = 1;
+  let totalPages = 1;
+  
+  function renderPage(page) {
+    const tbody = document.querySelector('#videoTable tbody');
+    tbody.innerHTML = '';
+    const data = (filteredVideos !== null) ? filteredVideos : videos;
+    totalPages = Math.ceil(data.length / PAGE_SIZE);
+    if(totalPages === 0) totalPages = 1;
+    if(page < 1) page = 1;
+    if(page > totalPages) page = totalPages;
+    currentPage = page;
+  
+    const start = (page - 1) * PAGE_SIZE;
+    const end = Math.min(start + PAGE_SIZE, data.length);
+    for (let i = start; i < end; i++) {
+      const [videoId, date, title] = data[i];
+      const tr = document.createElement('tr');
+  
+      const dateTd = document.createElement('td');
+      dateTd.textContent = date;
+      tr.appendChild(dateTd);
+  
+      const titleTd = document.createElement('td');
+      const a = document.createElement('a');
+      a.href = `https://www.youtube.com/watch?v=${videoId}`;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = title;
+      titleTd.appendChild(a);
+      tr.appendChild(titleTd);
+  
+      tbody.appendChild(tr);
     }
-
-    function renderPage(page) {
-      const tbody = document.querySelector('#videoTable tbody');
-      tbody.innerHTML = '';
-      const data = (filteredVideos !== null) ? filteredVideos : videos;
-      totalPages = Math.ceil(data.length / PAGE_SIZE);
-      if(totalPages === 0) totalPages = 1;
-      if(page < 1) page = 1;
-      if(page > totalPages) page = totalPages;
-      currentPage = page;
-
-      const start = (page - 1) * PAGE_SIZE;
-      const end = Math.min(start + PAGE_SIZE, data.length);
-      for (let i = start; i < end; i++) {
-        const [videoId, date, title] = data[i];
-        const tr = document.createElement('tr');
-
-        // 日時セル
-        const dateTd = document.createElement('td');
-        dateTd.textContent = date;
-        tr.appendChild(dateTd);
-
-        // タイトルセル
-        const titleTd = document.createElement('td');
-        const a = document.createElement('a');
-        a.href = `https://www.youtube.com/watch?v=${videoId}`;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        a.textContent = title;
-        titleTd.appendChild(a);
-        tr.appendChild(titleTd);
-
-        tbody.appendChild(tr);
-      }
-
-      ['Top', 'Bottom'].forEach(pos => {
-        document.getElementById(`pageInfo${pos}`).textContent = `${currentPage} / ${totalPages}`;
-        document.getElementById(`prevBtn${pos}`).disabled = currentPage === 1;
-        document.getElementById(`nextBtn${pos}`).disabled = currentPage === totalPages;
-        document.getElementById(`firstBtn${pos}`).disabled = currentPage === 1;
-        document.getElementById(`lastBtn${pos}`).disabled = currentPage === totalPages;
-      });
-    }
-
-    async function loadData() {
-      try {
-        const res = await fetch(CSV_URL);
-        if (!res.ok) throw new Error('ファイルの読み込みに失敗しました');
-        const text = await res.text();
-        videos = parseTSV(text);
-        filteredVideos = null;
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('videoTable').style.display = '';
-        document.getElementById('paginationTop').style.display = '';
-        document.getElementById('paginationBottom').style.display = '';
-        renderPage(1);
-      } catch (e) {
-        document.getElementById('loading').textContent = e.message;
-      }
-    }
-
-    function goPage(newPage) {
-      renderPage(newPage);
-    }
-
-    function applyFilter() {
-      const pattern = document.getElementById('searchInput').value.trim();
-      if (!pattern) {
-        filteredVideos = null;
-        renderPage(1);
-        return;
-      }
-      let regex;
-      try {
-        regex = new RegExp(pattern, 'i');
-      } catch (e) {
-        alert('正規表現の構文エラーです');
-        return;
-      }
-      filteredVideos = videos.filter(([id, date, title]) => regex.test(date) || regex.test(title));
-      renderPage(1);
-    }
-
-    document.getElementById('searchInput').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        document.getElementById('searchBtn').click();
-      }
-    });
-    document.getElementById('searchBtn').addEventListener('click', applyFilter);
-    document.getElementById('clearBtn').addEventListener('click', () => {
-      document.getElementById('searchInput').value = '';
-      filteredVideos = null;
-      renderPage(1);
-    });
-
+  
     ['Top', 'Bottom'].forEach(pos => {
-      document.getElementById(`prevBtn${pos}`).addEventListener('click', () => goPage(currentPage - 1));
-      document.getElementById(`nextBtn${pos}`).addEventListener('click', () => goPage(currentPage + 1));
-      document.getElementById(`firstBtn${pos}`).addEventListener('click', () => goPage(1));
-      document.getElementById(`lastBtn${pos}`).addEventListener('click', () => goPage(totalPages));
+      document.getElementById(`pageInfo${pos}`).textContent = `${currentPage} / ${totalPages}`;
+      document.getElementById(`prevBtn${pos}`).disabled = currentPage === 1;
+      document.getElementById(`nextBtn${pos}`).disabled = currentPage === totalPages;
+      document.getElementById(`firstBtn${pos}`).disabled = currentPage === 1;
+      document.getElementById(`lastBtn${pos}`).disabled = currentPage === totalPages;
     });
-
-    loadData();
+  }
+  
+  async function loadData(query = '') {
+    try {
+      const res = await fetch(`https://boxpush.d4df816be9225fab.workers.dev/?q=${encodeURIComponent(query)}`);
+      if (!res.ok) throw new Error('Workersからの取得に失敗しました');
+      const text = await res.text();
+      videos = text.trim() ? text.split('\n').map(line => line.split('\t')) : [];
+      filteredVideos = null;
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('videoTable').style.display = '';
+      document.getElementById('paginationTop').style.display = '';
+      document.getElementById('paginationBottom').style.display = '';
+      renderPage(1);
+    } catch (e) {
+      document.getElementById('loading').textContent = e.message;
+    }
+  }
+  
+  function goPage(newPage) {
+    renderPage(newPage);
+  }
+  
+  function applyFilter() {
+    const pattern = document.getElementById('searchInput').value.trim();
+    loadData(pattern); // Workers に検索ワードを渡して取得
+  }
+  
+  document.getElementById('searchInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('searchBtn').click();
+    }
+  });
+  document.getElementById('searchBtn').addEventListener('click', applyFilter);
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    document.getElementById('searchInput').value = '';
+    loadData(''); // 検索解除で全件取得
+  });
+  
+  ['Top', 'Bottom'].forEach(pos => {
+    document.getElementById(`prevBtn${pos}`).addEventListener('click', () => goPage(currentPage - 1));
+    document.getElementById(`nextBtn${pos}`).addEventListener('click', () => goPage(currentPage + 1));
+    document.getElementById(`firstBtn${pos}`).addEventListener('click', () => goPage(1));
+    document.getElementById(`lastBtn${pos}`).addEventListener('click', () => goPage(totalPages));
+  });
+  
+  // ページ読み込み時は全件取得
+  loadData();
   </script>
 </body>
 </html>
+
