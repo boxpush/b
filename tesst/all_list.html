@@ -20,7 +20,7 @@
   <div>Youtubeの雑な検索と違い,検索ワードに一致する結果しか出ません.</div>
   </p>
   <div id="searchForm">
-    <input type="text" id="searchInput" placeholder="日時・タイトルを正規表現で検索" />
+    <input type="text" id="searchInput" placeholder="日時・タイトルを正規表現で検索" value="ゲーム実況" />
     <button id="searchBtn">検索</button>
     <button id="clearBtn">クリア</button>
   </div>
@@ -145,9 +145,9 @@
     document.getElementById(`lastBtn${pos}`).addEventListener('click', () => goPage(totalPages));
   });
   
-  // ページ読み込み時は全件取得
-  loadData();
-  </script>
+  // ページ読み込み時に初期ワードで検索
+  applyFilter();
+</script>
 </body>
 </html>
 
