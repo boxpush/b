@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="max-age=3600">
     <title>Image Viewer</title>
     <style>
         body {
@@ -245,14 +246,13 @@
         
         const todayStr = new Date().toISOString().slice(0,10).replace(/-/g,''); // "yyyymmdd"形式
         const imgDateStr = getDateString(offset);
+        newTxtSrc = txtSrc;
         if (imgDateStr >= todayStr) {
           newImg.src = imgSrc + '?t=' + Date.now();
-          txtSrc = txtSrc + '?t=' + Date.now()
+          newTxtSrc = txtSrc + '?t=' + Date.now()
         } else {
           newImg.src = imgSrc;
         }
-        
-        
 //        newImg.src = imgSrc + '?t=' + new Date().getTime();
 
         const d = new Date(startDate);
@@ -262,7 +262,7 @@
         const day = String(d.getDate()).padStart(2, '0');
         document.getElementById('dateInput').value = `${y}${m}${day}`;
 
-        fetch(txtSrc + '?t=' + new Date().getTime())
+        fetch(newTxtSrc)
             .then(response => {
                 if (!response.ok) throw new Error('');
                 return response.text();
