@@ -242,7 +242,18 @@
             }
             console.error('画像の読み込みに失敗しました');
         };
-        newImg.src = imgSrc + '?t=' + new Date().getTime();
+        
+        const todayStr = new Date().toISOString().slice(0,10).replace(/-/g,''); // "yyyymmdd"形式
+        const imgDateStr = getDateString(offset);
+        if (imgDateStr >= todayStr) {
+          newImg.src = imgSrc + '?t=' + Date.now();
+          txtSrc = txtSrc + '?t=' + Date.now()
+        } else {
+          newImg.src = imgSrc;
+        }
+        
+        
+//        newImg.src = imgSrc + '?t=' + new Date().getTime();
 
         const d = new Date(startDate);
         d.setDate(d.getDate() + offset);
