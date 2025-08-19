@@ -29,6 +29,8 @@
     <button id="firstBtnTop" disabled>最初へ</button>
     <button id="prevBtnTop" disabled>前へ</button>
     <span id="pageInfoTop"></span>
+    <input type="number" id="pageInputTop" min="1" style="width: 50px; text-align: right;" />
+    <button id="jumpBtnTop">ジャンプ</button>
     <button id="nextBtnTop" disabled>次へ</button>
     <button id="lastBtnTop" disabled>最後へ</button>
   </nav>
@@ -48,6 +50,8 @@
     <button id="firstBtnBottom" disabled>最初へ</button>
     <button id="prevBtnBottom" disabled>前へ</button>
     <span id="pageInfoBottom"></span>
+    <input type="number" id="pageInputTop" min="1" style="width: 50px; text-align: right;" />
+    <button id="jumpBtnTop">ジャンプ</button>
     <button id="nextBtnBottom" disabled>次へ</button>
     <button id="lastBtnBottom" disabled>最後へ</button>
   </nav>
@@ -93,6 +97,7 @@
   
     ['Top', 'Bottom'].forEach(pos => {
       document.getElementById(`pageInfo${pos}`).textContent = `${currentPage} / ${totalPages}`;
+      document.getElementById(`pageInput${pos}`).value = currentPage; // フォームの値を更新
       document.getElementById(`prevBtn${pos}`).disabled = currentPage === 1;
       document.getElementById(`nextBtn${pos}`).disabled = currentPage === totalPages;
       document.getElementById(`firstBtn${pos}`).disabled = currentPage === 1;
@@ -118,7 +123,11 @@
   }
   
   function goPage(newPage) {
-    renderPage(newPage);
+    // 入力値が有効なページ番号か確認
+    const pageNum = parseInt(newPage, 10);
+    if (pageNum >= 1 && pageNum <= totalPages) {
+      renderPage(pageNum);
+    }
   }
   
   function applyFilter() {
@@ -143,8 +152,21 @@
     document.getElementById(`nextBtn${pos}`).addEventListener('click', () => goPage(currentPage + 1));
     document.getElementById(`firstBtn${pos}`).addEventListener('click', () => goPage(1));
     document.getElementById(`lastBtn${pos}`).addEventListener('click', () => goPage(totalPages));
+
+    // ジャンプ機能のイベントリスナー
+    const jumpBtn = document.getElementById(`jumpBtn${pos}`);
+    const pageInput = document.getElementById(`pageInput${pos}`);
+
+    jumpBtn.addEventListener('click', () => {
+      goPage(pageInput.value);
+    });
+    pageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        goPage(pageInput.value);
+      }
+    });
   });
-  
+
   // ページ読み込み時に初期ワードで検索
   applyFilter();
 </script>
