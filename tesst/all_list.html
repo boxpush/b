@@ -123,11 +123,20 @@
   }
   
   function goPage(newPage) {
-    // 入力値が有効なページ番号か確認
-    const pageNum = parseInt(newPage, 10);
-    if (pageNum >= 1 && pageNum <= totalPages) {
-      renderPage(pageNum);
+    let pageNum = parseInt(newPage, 10);
+    // 入力値が数値でない場合は1に設定
+    if (isNaN(pageNum)) {
+        pageNum = 1;
     }
+    // 1より小さい場合は1に補正
+    if (pageNum < 1) {
+        pageNum = 1;
+    }
+    // 総ページ数より大きい場合は総ページ数に補正
+    if (pageNum > totalPages) {
+        pageNum = totalPages;
+    }
+    renderPage(pageNum);
   }
   
   function applyFilter() {
