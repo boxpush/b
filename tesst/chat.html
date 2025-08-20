@@ -124,13 +124,36 @@
               top: top,
               behavior: "smooth"
             });
-          }, 500);         
+          }, 0);         
           return
         } catch (err) {
         }
       }
       results.textContent = `エラー`;
     });
+
+    function createYouTubeLink(videoId) {
+      // Base URLs for the YouTube video and its thumbnail
+      const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+      const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+
+      // Create an anchor element for the link
+      const link = document.createElement('a');
+      link.href = videoUrl;
+      link.target = '_blank'; // Optional: Opens the link in a new tab
+
+      // Create an image element for the thumbnail
+      const thumbnail = document.createElement('img');
+      thumbnail.src = thumbnailUrl;
+      thumbnail.alt = 'YouTube Video Thumbnail';
+      thumbnail.style.width = '320px'; // Example: Set a fixed width
+      thumbnail.style.height = '180px'; // Example: Set a fixed height
+
+      // Append the thumbnail to the link
+      link.appendChild(thumbnail);
+
+      return link;
+    }
 
     function renderResults(data) {
       const MAX_ROWS = 1000;
@@ -140,6 +163,7 @@
         return;
       }
       for (const [videoId, messages] of Object.entries(data)) {
+/*
         const link = document.createElement('a');
         link.href = `https://www.youtube.com/watch?v=${videoId}`;
         link.textContent = videoId;
@@ -147,7 +171,10 @@
         link.style.display = "block";
         link.style.fontSize = "1.2rem";
         link.style.marginTop = "2rem";
-        results.appendChild(link);
+        results.appendChild(youtubeLink);
+*/
+        const youtubeLink = createYouTubeLink(videoId);
+        results.appendChild(youtubeLink);
 
         const table = document.createElement('table');
         const thead = document.createElement('thead');
