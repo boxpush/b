@@ -140,7 +140,8 @@
       // Create an anchor element for the link
       const link = document.createElement('a');
       link.href = videoUrl;
-      link.target = '_blank'; // Optional: Opens the link in a new tab
+      link.target = '_blank';
+      link.rel="noopener noreferrer";
 
       // Create an image element for the thumbnail
       const thumbnail = document.createElement('img');
