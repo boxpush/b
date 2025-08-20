@@ -105,16 +105,14 @@
   
   async function loadData(query = '') {
     try {
-      const res = await fetch("https://boxpush.d4df816be9225fab.workers.dev/all", {
-        method: "POST",
+      const url = `https://boxpush.d4df816be9225fab.workers.dev/all?keywords=${encodeURIComponent(keywords)}`;
+      const res = await fetch(url, {
+      method: "GET",
         headers: {
           "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ keywords: JSON.stringify(query) })
+        }
       });
-
-
-      if (!res.ok) throw new Error('Workersからの取得に失敗しました');
+      if (!res.ok) throw new Error('取得に失敗しました');
       const text = await res.text();
       videos = text.trim() ? text.split('\n').map(line => line.split('\t')) : [];
       filteredVideos = null;
