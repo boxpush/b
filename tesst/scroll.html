@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>スムーズスクロールの例</title>
+    <style>
+        /* CSSでスムーズスクロールを有効にする */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* サンプルコンテンツ用スタイル（スクロール可能にするために十分な高さとIDを設定） */
+        body {
+            font-family: sans-serif;
+            margin: 0;
+        }
+        .section {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            color: white;
+            text-align: center;
+        }
+        #section1 { background-color: #ff6347; }
+        #section2 { background-color: #4682b4; }
+        #section3 { background-color: #3cb371; }
+
+        /* ナビゲーションメニュー */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            text-align: center;
+            z-index: 1000;
+        }
+        nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#section1">セクション 1へ</a>
+        <a href="#section2">セクション 2へ</a>
+        <a href="#section3">セクション 3へ</a>
+    </nav>
+
+    <div id="section1" class="section">セクション 1</div>
+    <div id="section2" class="section">セクション 2</div>
+    <div id="section3" class="section">セクション 3</div>
+
+</body>
+</html>
