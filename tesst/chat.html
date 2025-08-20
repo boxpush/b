@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>チャット検索</title>
   <style>
-    html { scroll-behavior: smooth; }
     body { font-family: sans-serif; margin: 2rem; }
     table { border-collapse: collapse; margin-bottom: 2rem; width: 100%; }
     th, td { border: 1px solid #ccc; padding: 4px 8px; text-align: left; }
@@ -24,9 +23,7 @@
   <div style="margin-bottom: 20px;"></div>
   <div class="checkboxes" id="checkboxes"></div>
   <button id="searchBtn">検索</button>
-
   <div id="results"></div>
-
   <script>
     const checkboxes = [
       ["山岸","愛梨","山岸愛梨"],
@@ -54,56 +51,43 @@
       ["大島","璃音","大島璃音"],
       ["ウェザーロイド","Airi","ポン子"]
     ];
-
-    const results = document.getElementById('results');
-    const checkboxContainer = document.getElementById('checkboxes');
-    // グリッドレイアウトで3グループごとに1行
+    const results = document.getElementById("results");
+    const checkboxContainer = document.getElementById("checkboxes");
     checkboxContainer.style.display = "grid";
     checkboxContainer.style.gridTemplateColumns = "repeat(3, 1fr)";
     checkboxContainer.style.gap = "1rem";
-
-    // グループごとにチェックボックスを生成（枠つき＆クリックでトグル）
     checkboxes.forEach(group => {
-      const groupDiv = document.createElement('div');
+      const groupDiv = document.createElement("div");
       groupDiv.style.padding = "0.5rem";
       groupDiv.style.border = "2px solid #666";
       groupDiv.style.cursor = "pointer";
 
       group.forEach(word => {
-        const label = document.createElement('label');
+        const label = document.createElement("label");
         label.style.marginRight = "0.5rem";
-        const input = document.createElement('input');
+        const input = document.createElement("input");
         input.type = "checkbox";
         input.value = word;
         label.appendChild(input);
         label.appendChild(document.createTextNode(word));
         groupDiv.appendChild(label);
       });
-
-      // グループ全体クリックでチェックをトグル（ただしチェックボックス自体は無視）
-      groupDiv.addEventListener('click', (e) => {
-        if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'label') return;
+      groupDiv.addEventListener("click", (e) => {
+        if (e.target.tagName.toLowerCase() === "input" || e.target.tagName.toLowerCase() === "label") return;
         const inputs = groupDiv.querySelectorAll('input[type="checkbox"]');
         const allChecked = Array.from(inputs).every(cb => cb.checked);
         inputs.forEach(cb => cb.checked = !allChecked);
       });
-
       checkboxContainer.appendChild(groupDiv);
     });
-
-
-
-    document.getElementById('searchBtn').addEventListener('click', async () => {
+    document.getElementById("searchBtn").addEventListener("click", async () => {
       results.innerHTML = "";
 
-      // 選択された値を集める
       const selected = [...checkboxContainer.querySelectorAll("input:checked")].map(el => el.value);
       if (selected.length === 0) {
-        results.textContent = "検索語を選んでください";
+        results.textContent = "検索ワードを選んでください";
         return;
       }
-
-      // カンマ区切りで keywords を作成
       const keywords = encodeURIComponent(selected.join(","));
       const url = `https://boxpush.d4df816be9225fab.workers.dev/chat`;
 
@@ -117,42 +101,27 @@
           if (!response.ok) throw new Error(`HTTP エラー: ${response.status}`);
           const data = await response.json();
           renderResults(data);
-          setTimeout(() => {
-            const resultsElem = document.getElementById("results");
-            const top = resultsElem.getBoundingClientRect().top + window.scrollY;
-            window.scrollTo({
-              top: top,
-              behavior: "smooth"
-            });
-          }, 0);         
+          document.getElementById("results").scrollIntoView({ behavior: "smooth" });
           return
         } catch (err) {
         }
       }
-      results.textContent = `エラー`;
+      results.textContent = `エラーが発生しました`;
     });
 
     function createYouTubeLink(videoId) {
-      // Base URLs for the YouTube video and its thumbnail
       const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
       const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-
-      // Create an anchor element for the link
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = videoUrl;
-      link.target = '_blank';
+      link.target = "_blank";
       link.rel="noopener noreferrer";
-
-      // Create an image element for the thumbnail
-      const thumbnail = document.createElement('img');
+      const thumbnail = document.createElement("img");
       thumbnail.src = thumbnailUrl;
-      thumbnail.alt = 'YouTube Video Thumbnail';
-      thumbnail.style.width = '320px'; // Example: Set a fixed width
-      thumbnail.style.height = '180px'; // Example: Set a fixed height
-
-      // Append the thumbnail to the link
+      thumbnail.alt = "YouTube Video Thumbnail";
+      thumbnail.style.width = "320px";
+      thumbnail.style.height = "180px";
       link.appendChild(thumbnail);
-
       return link;
     }
 
@@ -164,29 +133,19 @@
         return;
       }
       for (const [videoId, messages] of Object.entries(data)) {
-/*
-        const link = document.createElement('a');
-        link.href = `https://www.youtube.com/watch?v=${videoId}`;
-        link.textContent = videoId;
-        link.target = "_blank";
-        link.style.display = "block";
-        link.style.fontSize = "1.2rem";
-        link.style.marginTop = "2rem";
-        results.appendChild(youtubeLink);
-*/
         const youtubeLink = createYouTubeLink(videoId);
         results.appendChild(youtubeLink);
 
-        const table = document.createElement('table');
-        const thead = document.createElement('thead');
+        const table = document.createElement("table");
+        const thead = document.createElement("thead");
         thead.innerHTML = "<tr><th>日時</th><th>メッセージ</th></tr>";
         table.appendChild(thead);
 
-        const tbody = document.createElement('tbody');
+        const tbody = document.createElement("tbody");
         for (const line of messages) {
           if (rowCount >= MAX_ROWS) break;
           const [datetime, message] = line.split("\t");
-          const tr = document.createElement('tr');
+          const tr = document.createElement("tr");
           tr.innerHTML = `<td>${datetime}</td><td>${message}</td>`;
           tbody.appendChild(tr);
           rowCount++;
@@ -196,9 +155,9 @@
         results.appendChild(table);
 
         if (rowCount >= MAX_ROWS) {
-          const cutoffMsg = document.createElement('div');
-          cutoffMsg.className = 'cutoff';
-          cutoffMsg.textContent = `表示は ${MAX_ROWS} 行で打ち切りました。`;
+          const cutoffMsg = document.createElement("div");
+          cutoffMsg.className = "cutoff";
+          cutoffMsg.textContent = "表示は ${MAX_ROWS} 行で打ち切りました。";
           results.appendChild(cutoffMsg);
           break;
         }
