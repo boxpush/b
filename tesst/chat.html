@@ -23,21 +23,52 @@
   <div id="results"></div>
 
   <script>
-    const checkboxes = ["小林","佐藤"];  // ここで定義
+    const checkboxes = [
+      ["山岸","愛梨","山岸愛梨"],
+      ["江川","清音","江川清音"],
+      ["松雪","彩花","松雪彩花"],
+      ["白井","ゆかり","白井ゆかり"],
+      ["高山","奈々","高山奈々"],
+      ["駒木","結衣","駒木結衣"],
+      ["戸北","美月","戸北美月"],
+      ["川畑","玲","川畑玲"],
+      ["小林","李衣奈","小林李衣奈"],
+      ["魚住","茉由","魚住茉由"],
+      ["小川","千奈","小川千奈"],
+      ["青原","桃香","青原桃香"]
+      ["岡本","結子","岡本結子リサ"],
+      ["福吉","貴文","福吉貴文"],
+      ["田辺","真南葉","田辺真南葉"],
+      ["松本","真央","松本真央"],
+      ["鈴木","里奈","鈴木里奈"],
+      ["角田","奈緒子","角田奈緒子"],
+      ["檜山","沙耶","檜山沙耶"],
+      ["武藤","彩芽","武藤彩芽"],
+      ["内田","侑希","内田侑希"],
+      ["大島","璃音","大島璃音"],
+    ];
+
 
     const checkboxContainer = document.getElementById('checkboxes');
     const results = document.getElementById('results');
 
-    // チェックボックスを動的生成
-    checkboxes.forEach(word => {
-      const label = document.createElement('label');
-      const input = document.createElement('input');
-      input.type = "checkbox";
-      input.value = word;
-      label.appendChild(input);
-      label.appendChild(document.createTextNode(word));
-      checkboxContainer.appendChild(label);
+    // グループごとにチェックボックスを生成
+    checkboxes.forEach(group => {
+      const groupDiv = document.createElement('div');
+      groupDiv.style.marginBottom = "0.5rem";
+      group.forEach(word => {
+        const label = document.createElement('label');
+        const input = document.createElement('input');
+        input.type = "checkbox";
+        input.value = word;
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(word));
+        groupDiv.appendChild(label);
+        groupDiv.appendChild(document.createTextNode(" "));
+      });
+      checkboxContainer.appendChild(groupDiv);
     });
+
 
     document.getElementById('searchBtn').addEventListener('click', async () => {
       results.innerHTML = "";
@@ -71,9 +102,14 @@
         return;
       }
       for (const [videoId, messages] of Object.entries(data)) {
-        const h1 = document.createElement('h1');
-        h1.textContent = videoId;
-        results.appendChild(h1);
+        const link = document.createElement('a');
+        link.href = `https://www.youtube.com/watch?v=${videoId}`;
+        link.textContent = videoId;
+        link.target = "_blank";
+        link.style.display = "block";
+        link.style.fontSize = "1.2rem";
+        link.style.marginTop = "2rem";
+        results.appendChild(link);
 
         const table = document.createElement('table');
         const thead = document.createElement('thead');
