@@ -5,7 +5,11 @@
   <title>ログ検索フォーム</title>
   <style>
     body { font-family: sans-serif; margin: 2rem; }
-    textarea { width: 100%; height: 300px; margin-top: 1rem; }
+    table { border-collapse: collapse; margin-bottom: 2rem; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 4px 8px; text-align: left; }
+    th { background: #f0f0f0; }
+    h1 { font-size: 1.2rem; margin-top: 2rem; }
+    .cutoff { color: red; font-weight: bold; margin-bottom: 2rem; }
   </style>
 </head>
 <body>
@@ -15,35 +19,85 @@
     <button type="submit">検索</button>
   </form>
 
-  <textarea id="result" readonly placeholder="検索結果がここに表示されます"></textarea>
+  <div id="results"></div>
 
   <script>
     const form = document.getElementById('searchForm');
-    const resultArea = document.getElementById('result');
+    const results = document.getElementById('results');
 
     form.addEventListener('submit', async (e) => {
-      e.preventDefault(); // フォーム送信をキャンセル
+      e.preventDefault();
+
+      results.innerHTML = ""; // 結果をクリア
 
       const keywords = encodeURIComponent(document.getElementById('keywords').value.trim());
       if (!keywords) {
-        resultArea.value = "キーワードを入力してください";
+        results.textContent = "キーワードを入力してください";
         return;
       }
 
-      const url = `https://boxpush.d4df816be9225fab.workers.dev/chat?keywords=${keywords}`;
+      const url = `https://test.workers.dev/chat?keywords=${keywords}`;
 
       try {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP エラー: ${response.status}`);
 
         const data = await response.json();
-        // JSON を整形して表示
-        resultArea.value = JSON.stringify(data, null, 2);
+        renderResults(data);
 
       } catch (err) {
-        resultArea.value = `エラー: ${err.message}`;
+        results.textContent = `エラー: ${err.message}`;
       }
     });
+
+    function renderResults(data) {
+      const MAX_ROWS = 1000;
+      let rowCount = 0;
+
+      for (const [videoId, messages] of Object.entries(data)) {
+        // 動画IDを見出しに
+        const h1 = document.createElement('h1');
+        h1.textContent = videoId;
+        results.appendChild(h1);
+
+        // テーブルを作成
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        thead.innerHTML = "<tr><th>日時</th><th>メッセージ</th></tr>";
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+
+        for (const line of messages) {
+          if (rowCount >= MAX_ROWS) break;
+
+          const [datetime, message] = line.split("\t");
+          const tr = document.createElement('tr');
+          const td1 = document.createElement('td');
+          const td2 = document.createElement('td');
+
+          td1.textContent = datetime;
+          td2.textContent = message;
+
+          tr.appendChild(td1);
+          tr.appendChild(td2);
+          tbody.appendChild(tr);
+
+          rowCount++;
+        }
+
+        table.appendChild(tbody);
+        results.appendChild(table);
+
+        if (rowCount >= MAX_ROWS) {
+          const cutoffMsg = document.createElement('div');
+          cutoffMsg.className = 'cutoff';
+          cutoffMsg.textContent = `表示は ${MAX_ROWS} 行で打ち切りました。`;
+          results.appendChild(cutoffMsg);
+          break;
+        }
+      }
+    }
   </script>
 </body>
 </html>
