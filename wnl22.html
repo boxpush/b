@@ -7,19 +7,29 @@
     <style>
         .link-container {
           display: flex;
-          flex-direction: column; /* 縦並び */
-          gap: 10px;              /* リンク間の余白 */
+          flex-direction: column;
+          gap: 10px;
+        }
+        .link-container a {
+          align-self: flex-start;
+        }
+        #img {
+          width: 64px;
+          height: auto;
+          animation: slowGrow 1h ease-in forwards;
+        }
+        @keyframes slowGrow {
+          to {
+            width: 256px;
+          }
         }
 
-        .link-container a {
-          align-self: flex-start; /* 横幅を文字幅に合わせる */
-        }
     </style>
 </head>
 <body>
 <h1>Box Push Out Ridge Foreign capital Increase</h1>
 <div style="text-align: center;">
-  <img src="512x512.png" style="width: 64px; height: 64px;">
+  <img src="512x512.png" id="img">
 </div>
 <div class="link-container">
 <a href="tesst/unlisted_list.html" target="_blank">直近の限定公開</a>
@@ -30,4 +40,3 @@
 </div>
 </body>
 </html>
-
