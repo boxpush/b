@@ -106,20 +106,19 @@
       const keywords = encodeURIComponent(selected.join(","));
       const url = `https://boxpush.d4df816be9225fab.workers.dev/chat`;
 
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ keywords: keywords })
-        });
-        if (!response.ok) throw new Error(`HTTP エラー: ${response.status}`);
-        const data = await response.json();
-        renderResults(data);
-      } catch (err) {
-        results.textContent = `エラー: ${err.message}`;
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ keywords: keywords })
+          });
+          if (!response.ok) throw new Error(`HTTP エラー: ${response.status}`);
+          return await response.json(); // 成功したら返す
+        } catch (err) {
+        }
       }
+      results.textContent = `エラー: ${err.message}`;
     });
 
     function renderResults(data) {
