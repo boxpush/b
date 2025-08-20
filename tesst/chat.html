@@ -25,7 +25,7 @@
   <div><label><input type="checkbox" id="selectAll">All</label></div>
   <div style="margin-bottom: 20px;"></div>
   <button id="searchBtn">検索</button>
-  <div style="margin-bottom: 20px;"></div>
+  <div style="margin-bottom: 40px;"></div>
   <div id="results"></div>
   <script>
     const checkboxes = [
@@ -113,6 +113,7 @@
             body: JSON.stringify({ keywords: keywords })
           });
           if (!response.ok) throw new Error(`HTTP エラー: ${response.status}`);
+          results.textContent = "";
           const data = await response.json();
           renderResults(data);
           document.getElementById("results").scrollIntoView({ behavior: "smooth" });
