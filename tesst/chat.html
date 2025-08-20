@@ -123,7 +123,9 @@
       }
       results.textContent = `エラーが発生しました`;
     });
-
+    window.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    });
     function createYouTubeLink(videoId) {
       const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
       const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
