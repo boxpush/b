@@ -48,25 +48,42 @@
       ["大島","璃音","大島璃音"]
     ];
 
-    const checkboxContainer = document.getElementById('checkboxes');
     const results = document.getElementById('results');
+    const checkboxContainer = document.getElementById('checkboxes');
+    // グリッドレイアウトで3グループごとに1行
+    checkboxContainer.style.display = "grid";
+    checkboxContainer.style.gridTemplateColumns = "repeat(3, 1fr)";
+    checkboxContainer.style.gap = "1rem";
 
-    // グループごとにチェックボックスを生成
+    // グループごとにチェックボックスを生成（枠つき＆クリックでトグル）
     checkboxes.forEach(group => {
       const groupDiv = document.createElement('div');
-      groupDiv.style.marginBottom = "0.5rem";
+      groupDiv.style.padding = "0.5rem";
+      groupDiv.style.border = "2px solid #666";
+      groupDiv.style.cursor = "pointer";
+
       group.forEach(word => {
         const label = document.createElement('label');
+        label.style.marginRight = "0.5rem";
         const input = document.createElement('input');
         input.type = "checkbox";
         input.value = word;
         label.appendChild(input);
         label.appendChild(document.createTextNode(word));
         groupDiv.appendChild(label);
-        groupDiv.appendChild(document.createTextNode(" "));
       });
+
+      // グループ全体クリックでチェックをトグル（ただしチェックボックス自体は無視）
+      groupDiv.addEventListener('click', (e) => {
+        if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'label') return;
+        const inputs = groupDiv.querySelectorAll('input[type="checkbox"]');
+        const allChecked = Array.from(inputs).every(cb => cb.checked);
+        inputs.forEach(cb => cb.checked = !allChecked);
+      });
+
       checkboxContainer.appendChild(groupDiv);
     });
+
 
 
     document.getElementById('searchBtn').addEventListener('click', async () => {
