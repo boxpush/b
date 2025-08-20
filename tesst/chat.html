@@ -21,9 +21,9 @@
   <div>キャスターのミッドナイト出演を調査する為の機能で、検索範囲は00:00～05:00に限定されます.</div>
   <div>指定されたワード以外の検索はできません.</div>
   <div style="margin-bottom: 20px;"></div>
-  <div class="checkboxes" id="checkboxes">
-    <label><input type="checkbox" id="selectAll">All</label>
-  </div>
+  <div class="checkboxes" id="checkboxes"></div>
+  <div><label><input type="checkbox" id="selectAll">All</label></div>
+  <div style="margin-bottom: 20px;"></div>
   <button id="searchBtn">検索</button>
   <div style="margin-bottom: 20px;"></div>
   <div id="results"></div>
@@ -54,6 +54,7 @@
       ["大島","璃音","大島璃音","のんちゃん"],
       ["ウェザーロイド","Airi","ポン子"]
     ];
+    const selectAllCheckbox = document.getElementById("selectAll");
     selectAllCheckbox.addEventListener("change", (e) => {
       const isChecked = e.target.checked;
       const allCheckboxes = checkboxContainer.querySelectorAll('input[type="checkbox"]');
