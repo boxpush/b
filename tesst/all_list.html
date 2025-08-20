@@ -105,7 +105,15 @@
   
   async function loadData(query = '') {
     try {
-      const res = await fetch(`https://boxpush.d4df816be9225fab.workers.dev/?q=${encodeURIComponent(query)}`);
+      const res = await fetch("https://boxpush.d4df816be9225fab.workers.dev/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ keywords: encodeURIComponent(query) })
+      });
+
+
       if (!res.ok) throw new Error('Workersからの取得に失敗しました');
       const text = await res.text();
       videos = text.trim() ? text.split('\n').map(line => line.split('\t')) : [];
