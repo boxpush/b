@@ -116,12 +116,14 @@
           if (!response.ok) throw new Error(`HTTP エラー: ${response.status}`);
           const data = await response.json();
           renderResults(data);
-          const results = document.getElementById("results");
-          const top = results.getBoundingClientRect().top + window.scrollY;
-          window.scrollTo({
-            top: top,
-            behavior: "smooth"
-          });
+          setTimeout(() => {
+            const resultsElem = document.getElementById("results");
+            const top = resultsElem.getBoundingClientRect().top + window.scrollY;
+            window.scrollTo({
+              top: top,
+              behavior: "smooth"
+            });
+          }, 0);          
         } catch (err) {
         }
       }
