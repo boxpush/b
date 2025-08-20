@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Fetch Example</title>
+</head>
+<body>
+  <h1>テキストファイル読み込み</h1>
+  <pre id="output"></pre>
+
+  <script>
+    // sample.txtをfetchで取得
+    fetch('a_midnight_title_list.txt')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('ファイル読み込みに失敗しました');
+        }
+        return response.text();
+      })
+      .then(text => {
+        document.getElementById('output').textContent = text;
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  </script>
+</body>
+</html>
