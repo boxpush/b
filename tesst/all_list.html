@@ -110,7 +110,7 @@
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ keywords: encodeURIComponent(query) })
+        body: JSON.stringify({ keywords: JSON.stringify(query) })
       });
 
 
