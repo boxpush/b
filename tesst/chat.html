@@ -103,10 +103,16 @@
 
       // カンマ区切りで keywords を作成
       const keywords = encodeURIComponent(selected.join(","));
-      const url = `https://boxpush.d4df816be9225fab.workers.dev/chat?keywords=${keywords}`;
+      const url = `https://boxpush.d4df816be9225fab.workers.dev/chat`;
 
       try {
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ keywords: keywords })
+        });
         if (!response.ok) throw new Error(`HTTP エラー: ${response.status}`);
         const data = await response.json();
         renderResults(data);
