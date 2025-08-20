@@ -1,119 +1,133 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>ログ検索</title>
-  <style>
-    body { font-family: sans-serif; margin: 2rem; }
-    table { border-collapse: collapse; margin-bottom: 2rem; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 4px 8px; text-align: left; }
-    th { background: #f0f0f0; }
-    h1 { font-size: 1.2rem; margin-top: 2rem; }
-    .cutoff { color: red; font-weight: bold; margin-bottom: 2rem; }
-    .checkboxes { margin-bottom: 1rem; }
-    label { margin-right: 1rem; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>直近の限定公開</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin: 20px 0;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .video-item {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none; /* アンカータグの下線を削除 */
+            color: inherit;
+        }
+        .video-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .thumbnail-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            overflow: hidden;
+        }
+        .thumbnail-wrapper img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .video-info {
+            padding: 15px;
+        }
+        .video-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .video-date {
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-  <h1>ログ検索</h1>
+    <h1>直近の限定公開</h1>
 
-  <div class="checkboxes" id="checkboxes"></div>
-  <button id="searchBtn">検索</button>
+    <div class="container">
+        </div>
 
-  <div id="results"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.querySelector('.container');
+            const dataFile = 'id_title_unlisted.txt';
 
-  <script>
-    const checkboxes = [["小林","李衣奈","小林李衣奈"],["青原","桃香","青原桃香"]];
+            fetch(dataFile)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('ファイルの読み込みに失敗しました。');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    const lines = data.split('\n').filter(line => line.trim() !== '');
+                    
+                    if (lines.length === 0) {
+                        container.innerHTML = `<p style="text-align: center; color: #888;">表示する動画がありません。</p>`;
+                        return;
+                    }
 
-    const checkboxContainer = document.getElementById('checkboxes');
-    const results = document.getElementById('results');
+                    lines.forEach(line => {
+                        const parts = line.split('\t');
+                        if (parts.length >= 3) {
+                            const videoId = parts[0];
+                            const date = parts[1];
+                            const title = parts[2];
+                            
+                            const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                            const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
-    // グループごとにチェックボックスを生成
-    checkboxes.forEach(group => {
-      const groupDiv = document.createElement('div');
-      groupDiv.style.marginBottom = "0.5rem";
-      group.forEach(word => {
-        const label = document.createElement('label');
-        const input = document.createElement('input');
-        input.type = "checkbox";
-        input.value = word;
-        label.appendChild(input);
-        label.appendChild(document.createTextNode(word));
-        groupDiv.appendChild(label);
-        groupDiv.appendChild(document.createTextNode(" "));
-      });
-      checkboxContainer.appendChild(groupDiv);
-    });
+                            const videoItem = document.createElement('a');
+                            videoItem.className = 'video-item';
+                            videoItem.href = videoUrl;
+                            videoItem.target = '_blank'; // 新しいタブで開く
+                            videoItem.rel = 'noopener noreferrer'; // セキュリティ対策
 
-
-    document.getElementById('searchBtn').addEventListener('click', async () => {
-      results.innerHTML = "";
-
-      // 選択された値を集める
-      const selected = [...checkboxContainer.querySelectorAll("input:checked")].map(el => el.value);
-      if (selected.length === 0) {
-        results.textContent = "検索語を選んでください";
-        return;
-      }
-
-      // カンマ区切りで keywords を作成
-      const keywords = encodeURIComponent(selected.join(","));
-      const url = `https://boxpush.d4df816be9225fab.workers.dev/chat?keywords=${keywords}`;
-
-      try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`HTTP エラー: ${response.status}`);
-        const data = await response.json();
-        renderResults(data);
-      } catch (err) {
-        results.textContent = `エラー: ${err.message}`;
-      }
-    });
-
-    function renderResults(data) {
-      const MAX_ROWS = 1000;
-      let rowCount = 0;
-      if (Object.keys(data).length === 0) {
-        results.textContent = "検索結果は０件です";
-        return;
-      }
-      for (const [videoId, messages] of Object.entries(data)) {
-        const link = document.createElement('a');
-        link.href = `https://www.youtube.com/watch?v=${videoId}`;
-        link.textContent = videoId;
-        link.target = "_blank";
-        link.style.display = "block";
-        link.style.fontSize = "1.2rem";
-        link.style.marginTop = "2rem";
-        results.appendChild(link);
-
-        const table = document.createElement('table');
-        const thead = document.createElement('thead');
-        thead.innerHTML = "<tr><th>日時</th><th>メッセージ</th></tr>";
-        table.appendChild(thead);
-
-        const tbody = document.createElement('tbody');
-        for (const line of messages) {
-          if (rowCount >= MAX_ROWS) break;
-          const [datetime, message] = line.split("\t");
-          const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${datetime}</td><td>${message}</td>`;
-          tbody.appendChild(tr);
-          rowCount++;
-        }
-
-        table.appendChild(tbody);
-        results.appendChild(table);
-
-        if (rowCount >= MAX_ROWS) {
-          const cutoffMsg = document.createElement('div');
-          cutoffMsg.className = 'cutoff';
-          cutoffMsg.textContent = `表示は ${MAX_ROWS} 行で打ち切りました。`;
-          results.appendChild(cutoffMsg);
-          break;
-        }
-      }
-    }
-  </script>
+                            videoItem.innerHTML = `
+                                <div class="thumbnail-wrapper">
+                                    <img src="${thumbnailUrl}" alt="${title}">
+                                </div>
+                                <div class="video-info">
+                                    <div class="video-title">${title}</div>
+                                    <div class="video-date">${date}</div>
+                                </div>
+                            `;
+                            container.appendChild(videoItem);
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('エラー:', error);
+                    container.innerHTML = `<p style="color: red; text-align: center;">${error.message}</p>`;
+                });
+        });
+    </script>
 </body>
 </html>
