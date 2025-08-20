@@ -16,7 +16,8 @@
 </head>
 <body>
   <h1>動画検索</h1>
-  <div>google検索嫌いな人向け.検索ワードに一致する結果しか出ません.１日１回更新</div>
+  <div>やだなー怖いなー検索ワードと関係ない動画出てくるyoutube検索嫌いだなーって人用</div>
+  <div>検索ワードに一致する結果しか出ません.１日１回更新</div>
   <div id="searchForm">
     <input type="text" id="searchInput" placeholder="日時・タイトルを正規表現で検索" value="ゲーム実況" />
     <button id="searchBtn">検索</button>
@@ -151,7 +152,7 @@
   
   function applyFilter() {
     const pattern = document.getElementById('searchInput').value.trim();
-    loadData(pattern); // Workers に検索ワードを渡して取得
+    loadData(pattern);
   }
   
   document.getElementById('searchInput').addEventListener('keydown', function(e) {
