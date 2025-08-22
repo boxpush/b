@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>リアルタイムグラフ</title>
+  <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #graph-container {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="graph-container"></div>
+  <script>
+    const container = document.getElementById('graph-container');
+    let lastTimestamp = null;
+    let traceMap = {};
+    let lastXMap = {};
+    let virtualTime = new Date();
+    ONE_HOUR = 60 * 60 * 1000;
+    const windowWidthMs = 20 * ONE_HOUR; // N時間表示
+    let leftEdge = null;
+
+    const initialStart = new Date(virtualTime.getTime() - 18 * ONE_HOUR);
+    const initialEnd = new Date(virtualTime.getTime() + 2 * ONE_HOUR);
+
+    const config = {
+      displayModeBar: true,
+      displaylogo: false,
+      modeBarButtonsToRemove: [
+        'zoom2d', 'pan2d', 'select2d', 'lasso2d',
+        'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian',
+        'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'toggleSpikelines',
+        'toggleHover', 'resetViews', 'editInChartStudio'
+      ],
+      modeBarButtonsToAdd: ['toImage'],
+      responsive: true
+    };
+
+    const layout = {
+      xaxis: {
+        title: 'Time',
+        type: 'date',
+        fixedrange: false,
+        autorange: false,
+        range: [initialStart, initialEnd]
+      },
+      yaxis: { title: 'Value', range: [0, null] },
+      width: window.innerWidth,
+      height: window.innerHeight
+    };
+
+    Plotly.newPlot(container, [], layout, config);
+
+    async function updateGraph() {
+      try {
+        let now = virtualTime;
+
+        let url = "https://boxpush.d4df816be9225fab.workers.dev/data";
+        if (lastTimestamp) {
+          let startTimestamp = new Date(lastTimestamp.getTime() + 60 * 1000);
+          url += `?start=${startTimestamp.toISOString()}&end=${now.toISOString()}`;
+        }
+        console.log(url);
+        const response = await fetch(url);
+        const newData = await response.json();
+
+        if (newData.length > 0) {
+          //          console.log(s.x[s.x.length - 1]);
+          // データの最初と最後の時刻
+          let seriesStartTimes = newData.map(s => new Date(s.x[0]));
+          let seriesEndTimes = newData.map(s => new Date(s.x[s.x.length - 1]));
+          let newStart = new Date(Math.min(...seriesStartTimes));
+          let newEnd = new Date(Math.max(...seriesEndTimes));
+          console.log("newStart:" + newStart);
+          console.log("newEnd:" + newEnd);
+          // 最初の描画時のみ左端決定
+          if (!leftEdge) {
+            leftEdge = newStart;
+          }
+          let rightEdge = new Date(leftEdge.getTime() + windowWidthMs);
+          console.log(leftEdge);
+          console.log(rightEdge);
+
+          // 最新データが右端に近づいたら左端を右にシフト
+          if (newEnd > rightEdge) {
+            rightEdge = newEnd;
+            leftEdge = new Date(rightEdge.getTime() - windowWidthMs);
+          }
+
+          Plotly.relayout(container, {
+            'xaxis.range': [leftEdge, rightEdge],
+            'xaxis.autorange': false
+          });
+
+          const newTraces = [];
+          const newIds = [];
+
+          // --- updateGraph 内 ---
+          newData.forEach(series => {
+            const jstX = series.x.map(ts => new Date(ts));
+
+            if (series.id in traceMap) {
+              // 既存系列に追加：最後の時刻より大きいものだけ
+              const filteredX = [];
+              const filteredY = [];
+              const lastX = lastXMap[series.id] || 0;
+
+              jstX.forEach((t, i) => {
+                if (t.getTime() > lastX) {
+                  filteredX.push(t);
+                  filteredY.push(series.y[i]);
+                }
+              });
+              console.log("len:" + filteredX.length);
+              
+              if (filteredX.length > 0) {
+                Plotly.extendTraces(container, {
+                  x: [filteredX],
+                  y: [filteredY]
+                }, [traceMap[series.id]]);
+                lastXMap[series.id] = filteredX[filteredX.length - 1].getTime();
+              }
+            } else {
+              // 新規系列として追加
+              newTraces.push({
+                x: jstX,
+                y: series.y,
+                mode: 'lines+markers',
+                name: series.name,
+                line: { width: 2, color: series.color },
+                marker: { size: 4, color: series.color }
+              });
+              newIds.push(series.id);
+
+              // 最後の時刻を記録
+              lastXMap[series.id] = jstX[jstX.length - 1].getTime();
+            }
+          });
+
+          if (newTraces.length > 0) {
+            Plotly.addTraces(container, newTraces);
+            newIds.forEach((id, idx) => {
+              traceMap[id] = container.data.length - newTraces.length + idx;
+            });
+          }
+
+          lastTimestamp = newEnd;
+        }
+      } catch (err) {
+        console.error("データ取得失敗:", err);
+      }
+
+      // 仮想時刻を 1分進めて次回呼び出し
+      virtualTime = new Date(virtualTime.getTime() + 60 * 1000);
+      setTimeout(updateGraph, 60 * 1000);
+    }
+
+    updateGraph();
+  </script>
+</body>
+
+</html>
