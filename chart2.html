@@ -79,8 +79,9 @@
           url += `?start=${startTimestamp.toISOString()}&end=${now.toISOString()}`;
         }
         const response = await fetch(url);
-        const arrayBuffer = await response.arrayBuffer();
-        const newData = msgpack.decode(new Uint8Array(arrayBuffer));
+        const newData = await decodeAsync(response.body);
+//        const arrayBuffer = await response.arrayBuffer();
+//        const newData = msgpack.decode(new Uint8Array(arrayBuffer));
 
         if (newData.length > 0) {
           // データの最初と最後の時刻
