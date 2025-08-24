@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <link rel="icon" href="./favicon.ico" type="image/x-icon">  
   <title>本日の為替</title>
+  <script src="https://cdn.jsdelivr.net/npm/@msgpack/msgpack/dist.es5+umd/msgpack.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
   <style>
     body,
@@ -78,7 +79,8 @@
           url += `?start=${startTimestamp.toISOString()}&end=${now.toISOString()}`;
         }
         const response = await fetch(url);
-        const newData = await response.json();
+        const buffer = await response.arrayBuffer();
+        const newData = MessagePack.decode(new Uint8Array(buffer));
 
         if (newData.length > 0) {
           // データの最初と最後の時刻
