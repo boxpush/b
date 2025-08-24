@@ -78,9 +78,12 @@
           let startTimestamp = new Date(lastTimestamp.getTime() + 60 * 1000);
           url += `?start=${startTimestamp.toISOString()}&end=${now.toISOString()}`;
         }
-        const arrayBuffer = await response.arrayBuffer(); // バイナリとして受け取る
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
         const newData = msgpack.decode(new Uint8Array(arrayBuffer));
 
+
+        
         if (newData.length > 0) {
           // データの最初と最後の時刻
           let seriesStartTimes = newData.map(s => new Date(s.x[0]));
