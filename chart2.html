@@ -79,7 +79,11 @@
           url += `?start=${startTimestamp.toISOString()}&end=${now.toISOString()}`;
         }
         const response = await fetch(url);
-        const newData = await decodeAsync(response.body);
+        const buffer = await response.arrayBuffer();
+        const newData = msgpack.decode(buffer);
+
+//        const newData = await decodeAsync(response.body);
+
 //        const arrayBuffer = await response.arrayBuffer();
 //        const newData = msgpack.decode(new Uint8Array(arrayBuffer));
 
