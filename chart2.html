@@ -6,8 +6,7 @@
   <link rel="icon" href="./favicon.ico" type="image/x-icon">  
   <title>本日の為替</title>
   <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@msgpack/msgpack@3.1.2/dist/msgpack.min.js"></script>
-  
+  <script crossorigin src="https://unpkg.com/@msgpack/msgpack"></script>
   <style>
     body,
     html {
@@ -83,8 +82,6 @@
         const arrayBuffer = await response.arrayBuffer();
         const newData = msgpack.decode(new Uint8Array(arrayBuffer));
 
-
-        
         if (newData.length > 0) {
           // データの最初と最後の時刻
           let seriesStartTimes = newData.map(s => new Date(s.x[0]));
