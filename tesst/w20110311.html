@@ -114,10 +114,10 @@
                         const parts = line.split('\t');
                         if (parts.length >= 3) {
                             const videoId = DOMPurify.sanitize(parts[0]);
-                            const title = DOMPurify.sanitize(parts[1]);
+                            const title = DOMPurify.sanitize(parts[2]);
                             const secs = DOMPurify.sanitize(parts[2]);
 
-                            const videoUrl = `https://www.youtube.com/watch?v=${videoId}&t=${secs}`;
+                            const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
                             const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
                             const videoItem = document.createElement('a');
