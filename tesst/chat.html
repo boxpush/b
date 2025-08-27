@@ -206,7 +206,7 @@
           if (rowCount >= MAX_ROWS) break;
           let [dt, msg] = line.split("\t");
           dt = DOMPurify.sanitize(dt)
-          msg  = sanitizeAndConvertImages(msg)
+          msg = sanitizeAndConvertImages(msg)
           const tr = document.createElement("tr");
           tr.innerHTML = `<td>${dt}</td><td>${msg}</td>`;
           tbody.appendChild(tr);
@@ -228,8 +228,9 @@
 
     function sanitizeAndConvertImages(input) {
       let clean = DOMPurify.sanitize(input);
-      const urlPattern = /https:\/\/yt3\.ggpht\.com\/[^\s]+/g;
-      const result = clean.replace(urlPattern, (url) => {
+      const urlPattern = /\[https:\/\/yt3\.ggpht\.com\/[^\]\s]+\]/g;
+      const result = clean.replace(urlPattern, (match) => {
+        const url = match.slice(1, -1);
         return `<img src="${url}" alt="YouTube profile" />`;
       });
       return result;
