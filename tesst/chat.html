@@ -192,13 +192,20 @@
         results.textContent = "検索結果は０件です";
         return;
       }
-      for (const [videoId, messages] of Object.entries(data)) {
+      for (let [videoId, messages] of Object.entries(data)) {
+        videoId = DOMPurify.sanitize(videoId);
         const youtubeLink = createYouTubeLink(videoId);
         results.appendChild(youtubeLink);
-
         const table = document.createElement("table");
         const thead = document.createElement("thead");
-        thead.innerHTML = "<tr><th>日時</th><th>チャット</th></tr>";
+        const headerRow = document.createElement("tr");
+        const th1 = document.createElement("th");
+        th1.textContent = "日時";
+        headerRow.appendChild(th1);
+        const th2 = document.createElement("th");
+        th2.textContent = "チャット";
+        headerRow.appendChild(th2);
+        thead.appendChild(headerRow);
         table.appendChild(thead);
 
         const tbody = document.createElement("tbody");
@@ -208,7 +215,12 @@
           dt = DOMPurify.sanitize(dt)
           msg = sanitizeAndConvertImages(msg)
           const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${dt}</td><td>${msg}</td>`;
+          const td1 = document.createElement("td");
+          td1.textContent = dt;
+          tr.appendChild(td1);
+          const td2 = document.createElement("td");
+          td2.textContent = msg;
+          tr.appendChild(td2);
           tbody.appendChild(tr);
           rowCount++;
         }
