@@ -54,6 +54,9 @@
     label {
       margin-right: 1rem;
     }
+    .emoji {
+      vertical-align: middle;
+    }
   </style>
 </head>
 
@@ -243,7 +246,7 @@
       const urlPattern = /\[https:\/\/yt3\.ggpht\.com\/[^\]\s]+\]/g;
       const result = clean.replace(urlPattern, (match) => {
         const url = match.slice(1, -1);
-        return `<img src="${url}" alt="YouTube profile" />`;
+        return `<img class="emoji" src="${url}" alt="YouTube profile" />`;
       });
       return result;
     }
