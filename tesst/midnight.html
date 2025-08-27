@@ -1,8 +1,17 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+
+    <!-- DOMPurify 2.4.2
+       (c) 2015-2025 Cure53
+       MIT License
+       https://github.com/cure53/DOMPurify
+  -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.2/dist/purify.min.js"></script>
     <title>ミッドナイト(00:00～05:00)出演</title>
     <style>
         body {
@@ -11,11 +20,13 @@
             margin: 0;
             padding: 0;
         }
+
         h1 {
             text-align: center;
             color: #333;
             margin: 20px 0;
         }
+
         .container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -24,26 +35,32 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+
         .video-item {
             background-color: #fff;
             border: 1px solid #ddd;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s, box-shadow 0.2s;
-            text-decoration: none; /* アンカータグの下線を削除 */
+            text-decoration: none;
+            /* アンカータグの下線を削除 */
             color: inherit;
         }
+
         .video-item:hover {
             transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
+
         .thumbnail-wrapper {
             position: relative;
             width: 100%;
-            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            padding-top: 56.25%;
+            /* 16:9 Aspect Ratio */
             overflow: hidden;
         }
+
         .thumbnail-wrapper img {
             position: absolute;
             top: 0;
@@ -53,9 +70,11 @@
             object-fit: cover;
             display: block;
         }
+
         .video-info {
             padding: 15px;
         }
+
         .video-title {
             font-size: 1.1em;
             font-weight: bold;
@@ -64,11 +83,12 @@
         }
     </style>
 </head>
+
 <body>
     <h1>ミッドナイト(00:00～05:00)出演</h1>
 
     <div class="container">
-        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -84,7 +104,7 @@
                 })
                 .then(data => {
                     const lines = data.split('\n').filter(line => line.trim() !== '');
-                    
+
                     if (lines.length === 0) {
                         container.innerHTML = `<p style="text-align: center; color: #888;">表示する動画がありません。</p>`;
                         return;
@@ -93,10 +113,10 @@
                     lines.forEach(line => {
                         const parts = line.split('\t');
                         if (parts.length >= 3) {
-                            const videoId = parts[0];
-                            const title = parts[1];
-                            const secs = parts[2];
-                            
+                            const videoId = DOMPurify.sanitize(parts[0]);
+                            const title = DOMPurify.sanitize(parts[1]);
+                            const secs = DOMPurify.sanitize(parts[2]);
+
                             const videoUrl = `https://www.youtube.com/watch?v=${videoId}&t=${secs}`;
                             const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
@@ -125,4 +145,5 @@
         });
     </script>
 </body>
+
 </html>

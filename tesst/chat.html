@@ -4,9 +4,14 @@
 <head>
   <meta charset="UTF-8">
   <link rel="icon" href="./favicon.ico" type="image/x-icon">
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.2/dist/purify.min.js"></script>
 
-  <title>チャット検索(試験運用)</title>
+  <!-- DOMPurify 2.4.2
+     (c) 2015-2025 Cure53
+     MIT License
+     https://github.com/cure53/DOMPurify
+-->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.2/dist/purify.min.js"></script>
+  <title>チャット検索(実験)</title>
   <style>
     body {
       font-family: sans-serif;
@@ -54,6 +59,7 @@
     label {
       margin-right: 1rem;
     }
+
     .emoji {
       vertical-align: middle;
     }
@@ -63,7 +69,7 @@
 <body>
   <h1>チャット検索(実験)</h1>
   <div>ライブ動画から、キャスターに言及したチャットのみを抽出します.</div>
-  <div>キャスターのミッドナイト出演を調査する為の機能で、検索範囲は00:00～05:00に限定されます.</div>
+  <div>キャスターのミッドナイト出演を調査する為の実験的機能で、検索範囲は00:00～05:00に限定されます.</div>
   <div>指定されたワード以外の検索はできません.</div>
   <div style="margin-bottom: 20px;"></div>
   <div class="checkboxes" id="checkboxes"></div>
