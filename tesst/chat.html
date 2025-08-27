@@ -222,7 +222,7 @@
           td1.textContent = dt;
           tr.appendChild(td1);
           const td2 = document.createElement("td");
-          td2.textContent = msg;
+          td2.innerHTML = DOMPurify.sanitize(msg, { ALLOWED_TAGS: ['img'], ALLOWED_ATTR: ['src', 'alt', 'style', 'class'] });
           tr.appendChild(td2);
           tbody.appendChild(tr);
           rowCount++;
@@ -246,7 +246,7 @@
       const urlPattern = /\[https:\/\/yt3\.ggpht\.com\/[^\]\s]+\]/g;
       const result = clean.replace(urlPattern, (match) => {
         const url = match.slice(1, -1);
-        return `<img class="emoji" src="${url}" alt="YouTube profile" />`;
+        return `<img class="emoji" src="${url}" alt="" />`;
       });
       return result;
     }
