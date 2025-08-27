@@ -1,21 +1,62 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" href="./favicon.ico" type="image/x-icon">  
+  <link rel="icon" href="./favicon.ico" type="image/x-icon">
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.2/dist/purify.min.js"></script>
+
   <title>チャット検索(試験運用)</title>
   <style>
-    body { font-family: sans-serif; margin: 2rem; }
-    table { border-collapse: collapse; margin-bottom: 2rem; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 4px 8px; text-align: left; }
-    th { background: #f0f0f0; }
-    td:first-child, th:first-child { white-space: nowrap; width: 1%; }
-    h1 { font-size: 1.2rem; margin-top: 2rem; }
-    .cutoff { color: red; font-weight: bold; margin-bottom: 2rem; }
-    .checkboxes { margin-bottom: 1rem; }
-    label { margin-right: 1rem; }
+    body {
+      font-family: sans-serif;
+      margin: 2rem;
+    }
+
+    table {
+      border-collapse: collapse;
+      margin-bottom: 2rem;
+      width: 100%;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 4px 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #f0f0f0;
+    }
+
+    td:first-child,
+    th:first-child {
+      white-space: nowrap;
+      width: 1%;
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      margin-top: 2rem;
+    }
+
+    .cutoff {
+      color: red;
+      font-weight: bold;
+      margin-bottom: 2rem;
+    }
+
+    .checkboxes {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      margin-right: 1rem;
+    }
   </style>
 </head>
+
 <body>
   <h1>チャット検索(試験運用)</h1>
   <div>ライブ動画から、キャスターに言及したチャットのみを抽出します.</div>
@@ -30,31 +71,31 @@
   <div id="results"></div>
   <script>
     const checkboxes = [
-      ["緊急","地震","速報","揺れ","登場"],
-      ["山岸","愛梨","山岸愛梨","あいりん"],
-      ["江川","清音","江川清音","さーやん"],
-      ["松雪","彩花","松雪彩花","あやち"],
-      ["白井","ゆかり","白井ゆかり","ゆかりん"],
-      ["高山","奈々","高山奈々","なな"],
-      ["駒木","結衣","駒木結衣","ゆい"],
-      ["戸北","美月","戸北美月","みー"],
-      ["川畑","玲","川畑玲","ばたやん","きらりん"],
-      ["小林","李衣奈","小林李衣奈","会長","りーちゃん"],
-      ["魚住","茉由","魚住茉由","まゆ"],
-      ["小川","千奈","小川千奈","せん"],
-      ["青原","桃香","青原桃香","もも"],
-      ["岡本","結子","岡本結子リサ","リサ","姫"],
-      ["福吉","貴文","福吉貴文","ふくちゃん"],
-      ["田辺","真南葉","田辺真南葉","まなは","まなっはー"],
-      ["松本","真央","松本真央","まお"],
-      ["鈴木","里奈","鈴木里奈","りなっち"],
-      ["角田","奈緒子","角田奈緒子","なおこーん"],
-      ["武藤","彩芽","武藤彩芽","横尾"],
-      ["内田","侑希","内田侑希","ゆっきー"],
-      ["檜山","沙耶","檜山沙耶","おさや","さやっち"],
-      ["眞家","泉","眞家泉","いずみん"],
-      ["大島","璃音","大島璃音","のんちゃん"],
-      ["ウェザーロイド","Airi","ポン子"]
+      ["緊急", "地震", "速報", "揺れ", "登場"],
+      ["山岸", "愛梨", "山岸愛梨", "あいりん"],
+      ["江川", "清音", "江川清音", "さーやん"],
+      ["松雪", "彩花", "松雪彩花", "あやち"],
+      ["白井", "ゆかり", "白井ゆかり", "ゆかりん"],
+      ["高山", "奈々", "高山奈々", "なな"],
+      ["駒木", "結衣", "駒木結衣", "ゆい"],
+      ["戸北", "美月", "戸北美月", "みー"],
+      ["川畑", "玲", "川畑玲", "ばたやん", "きらりん"],
+      ["小林", "李衣奈", "小林李衣奈", "会長", "りーちゃん"],
+      ["魚住", "茉由", "魚住茉由", "まゆ"],
+      ["小川", "千奈", "小川千奈", "せん"],
+      ["青原", "桃香", "青原桃香", "もも"],
+      ["岡本", "結子", "岡本結子リサ", "リサ", "姫"],
+      ["福吉", "貴文", "福吉貴文", "ふくちゃん"],
+      ["田辺", "真南葉", "田辺真南葉", "まなは", "まなっはー"],
+      ["松本", "真央", "松本真央", "まお"],
+      ["鈴木", "里奈", "鈴木里奈", "りなっち"],
+      ["角田", "奈緒子", "角田奈緒子", "なおこーん"],
+      ["武藤", "彩芽", "武藤彩芽", "横尾"],
+      ["内田", "侑希", "内田侑希", "ゆっきー"],
+      ["檜山", "沙耶", "檜山沙耶", "おさや", "さやっち"],
+      ["眞家", "泉", "眞家泉", "いずみん"],
+      ["大島", "璃音", "大島璃音", "のんちゃん"],
+      ["ウェザーロイド", "Airi", "ポン子"]
     ];
     const selectAllCheckbox = document.getElementById("selectAll");
     selectAllCheckbox.addEventListener("change", (e) => {
@@ -134,7 +175,7 @@
       const link = document.createElement("a");
       link.href = videoUrl;
       link.target = "_blank";
-      link.rel="noopener noreferrer";
+      link.rel = "noopener noreferrer";
       const thumbnail = document.createElement("img");
       thumbnail.src = thumbnailUrl;
       thumbnail.alt = "YouTube Video Thumbnail";
@@ -163,9 +204,11 @@
         const tbody = document.createElement("tbody");
         for (const line of messages) {
           if (rowCount >= MAX_ROWS) break;
-          const [datetime, message] = line.split("\t");
+          let [dt, msg] = line.split("\t");
+          dt = DOMPurify.sanitize(dt)
+          msg  = sanitizeAndConvertImages(msg)
           const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${datetime}</td><td>${message}</td>`;
+          tr.innerHTML = `<td>${dt}</td><td>${msg}</td>`;
           tbody.appendChild(tr);
           rowCount++;
         }
@@ -182,6 +225,17 @@
         }
       }
     }
+
+    function sanitizeAndConvertImages(input) {
+      let clean = DOMPurify.sanitize(input);
+      const urlPattern = /https:\/\/yt3\.ggpht\.com\/[^\s]+/g;
+      const result = clean.replace(urlPattern, (url) => {
+        return `<img src="${url}" alt="YouTube profile" />`;
+      });
+      return result;
+    }
+
   </script>
 </body>
+
 </html>
