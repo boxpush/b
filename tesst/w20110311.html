@@ -115,10 +115,9 @@
                         if (parts.length >= 3) {
                             const videoId = DOMPurify.sanitize(parts[0]);
                             const title = DOMPurify.sanitize(parts[2]);
-                            const secs = DOMPurify.sanitize(parts[2]);
-
+                         
                             const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-                            const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                            const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 
                             const videoItem = document.createElement('a');
                             videoItem.className = 'video-item';
