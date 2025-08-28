@@ -254,13 +254,18 @@
         results.appendChild(table);
 
         if (rowCount >= MAX_ROWS) {
-          const cutoffMsg = document.createElement("div");
-          cutoffMsg.className = "cutoff";
-          cutoffMsg.textContent = `表示は ${MAX_ROWS} 行で打ち切りました。`;
-          results.appendChild(cutoffMsg);
           break;
         }
       }
+      const msg = document.createElement("div");
+      if (rowCount >= MAX_ROWS) {
+        msg.className = "cutoff";
+        msg.textContent = `表示は ${MAX_ROWS} 行で打ち切りました。`;
+      } else {
+        msg.className = "";
+        msg.textContent = `検索結果： ${rowCount} 件`;
+      }
+      results.appendChild(msg);
     }
 
     function sanitizeAndConvertImages(input) {
