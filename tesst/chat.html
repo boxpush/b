@@ -11,11 +11,25 @@
      https://github.com/cure53/DOMPurify
 -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.2/dist/purify.min.js"></script>
+  <!-- MessagePack.js
+     (c) 2010-2025 MessagePack project contributors
+     MIT License
+     https://github.com/msgpack/msgpack-javascript
+-->
+  <script src="https://cdn.jsdelivr.net/npm/@msgpack/msgpack/dist.es5+umd/msgpack.min.js"></script>
   <title>チャット検索(実験)</title>
   <style>
     body {
-      font-family: sans-serif;
-      margin: 2rem;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin: 20px 0;
     }
 
     table {
@@ -166,7 +180,9 @@
           });
           if (!response.ok) throw new Error(`HTTP エラー: ${response.status}`);
           results.textContent = "";
-          const data = await response.json();
+          const res = await response.json();
+          const buffer = await res.arrayBuffer();
+          const data = MessagePack.decode(new Uint8Array(buffer));
           renderResults(data);
           document.getElementById("results").scrollIntoView({ behavior: "smooth" });
           return
