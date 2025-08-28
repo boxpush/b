@@ -181,7 +181,7 @@
           if (!response.ok) throw new Error(`HTTP エラー: ${response.status}`);
           results.textContent = "";
           const buffer = await response.arrayBuffer();
-          const data = MessagePack.decodeMultiple(new Uint8Array(buffer));
+          const data = MessagePack.decode(new Uint8Array(buffer));
           renderResults(data);
           document.getElementById("results").scrollIntoView({ behavior: "smooth" });
           return
