@@ -315,7 +315,15 @@
         viewCountTd.textContent = Number(viewCount || 0).toLocaleString('ja-JP');
         tr.appendChild(viewCountTd);
         const kindTd = document.createElement('td');
-        kindTd.textContent = kind == 3 ? "🍰" : kind > 0 ? "🔴" : "";
+        if ((kind & 8) > 0) {
+          kindTd.textContent = "🍰";
+        } else if ((kind & 4) > 0) {
+          kindTd.textContent = "🔴";
+        } else if ((kind & 2) > 0) {
+          kindTd.textContent = "🔴";
+        } else {
+          kindTd.textContent = "";
+        }
         tr.appendChild(kindTd);
         const titleTd = document.createElement('td');
         const a = document.createElement('a');
