@@ -203,6 +203,9 @@
         <input type="text" class="searchField" id="maxComment" placeholder="" value="" style="width: 64px;" />
       </div>
     </div>
+    <label><input type="checkbox" id="normal" checked="checked">通常</label>
+    <label><input type="checkbox" id="live" checked="checked">ライブ</label>
+    <label><input type="checkbox" id="short" checked="checked">ショート</label>
     <div class="container">
       <div class="left-column">
         <div class="row">
@@ -273,6 +276,9 @@
     const maxFavorite = document.getElementById('maxFavorite');
     const minComment = document.getElementById('minComment');
     const maxComment = document.getElementById('maxComment');
+    const normal = document.getElementById('normal');
+    const live = document.getElementById('live');
+    const short = document.getElementById('short');
     const tbody = document.querySelector('#videoTable tbody');
     const regex = document.getElementById('regex');
     const regex2 = document.getElementById('regex2');
@@ -346,11 +352,21 @@
         const desc = searchInput2.value.trim();
         const regex_checked = regex.checked ? 1 : 0;
         const regex2_checked = regex2.checked ? 1 : 0;
+        let kind = normal.checked?1:0;
+        kind += live.checked?6:0;
+        kind += short.checked?8:0;
+        if (kind == 0) {
+          normal.checked = true;
+          live.checked = true;
+          short.checked = true;
+          kind = 1+2+4+8;
+        }
+
         const url = `https://boxpush.d4df816be9225fab.workers.dev/video`;
         const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ keywords: keywords, desc: desc, regex: regex_checked, regex2: regex2_checked, since: since.value, until: until.value, minTime: minTime.value, maxTime: maxTime.value, minView: minView.value, maxView: maxView.value, minLike: minLike.value, maxLike: maxLike.value, minFavorite: minFavorite.value, maxFavorite: maxFavorite.value, minComment: minComment.value, maxComment: maxComment.value, page: page })
+          body: JSON.stringify({ keywords: keywords, desc: desc, regex: regex_checked, regex2: regex2_checked, since: since.value, until: until.value, minTime: minTime.value, maxTime: maxTime.value, minView: minView.value, maxView: maxView.value, minLike: minLike.value, maxLike: maxLike.value, minFavorite: minFavorite.value, maxFavorite: maxFavorite.value, minComment: minComment.value, maxComment: maxComment.value, kind: kind, page: page })
         });
 
         if (!res.ok) throw new Error('取得に失敗しました');
@@ -447,6 +463,9 @@
       maxFavorite.value = '';
       minComment.value = '';
       maxComment.value = '';
+      normal.checked = true;
+      live.checked = true;
+      short.checked = true;
       regex.checked = false;
       regex2.checked = false;
       currentPage = 1;
