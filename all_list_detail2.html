@@ -43,8 +43,8 @@
       background: #eee;
     }
 
-    td:first-child,td:nth-child(2)
-    th:first-child,th:nth-child(2) {
+    td:first-child,td:nth-child(2),td:nth-child(3)
+    th:first-child,th:nth-child(2),th:nth-child(3) {
       white-space: nowrap;
       width: 1%;
     }
@@ -231,6 +231,7 @@
       <tr>
         <th>日時</th>
         <th>視聴回数</th>
+        <th></th>
         <th>タイトル</th>
       </tr>
     </thead>
@@ -297,6 +298,9 @@
         const viewCountTd = document.createElement('td');
         viewCountTd.textContent = viewCount;
         tr.appendChild(viewCountTd);
+        const kindTd = document.createElement('td');
+        kindTd.textContent = kind > 0 ? "🔴" : "";
+        tr.appendChild(kindTd);
         const titleTd = document.createElement('td');
         const a = document.createElement('a');
         a.href = `https://www.youtube.com/watch?v=${videoId}`;
