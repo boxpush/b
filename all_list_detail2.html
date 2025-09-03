@@ -43,10 +43,17 @@
       background: #eee;
     }
 
-    td:first-child,td:nth-child(2),td:nth-child(3)
-    th:first-child,th:nth-child(2),th:nth-child(3) {
+    td:first-child,
+    td:nth-child(2),
+    td:nth-child(3) th:first-child,
+    th:nth-child(2),
+    th:nth-child(3) {
       white-space: nowrap;
       width: 1%;
+    }
+
+    td:nth-child(2) {
+      text-align: right;
     }
 
     nav {
@@ -286,7 +293,7 @@
       const start = 0;
       const end = Math.min(start + PAGE_SIZE, data.length);
       for (let i = start; i < end; i++) {
-        let [videoId, date, title,kind,viewCount] = data[i];
+        let [videoId, date, title, kind, viewCount] = data[i];
         videoId = DOMPurify.sanitize(videoId);
         date = DOMPurify.sanitize(date);
         title = DOMPurify.sanitize(title);
@@ -296,7 +303,7 @@
         dateTd.textContent = date;
         tr.appendChild(dateTd);
         const viewCountTd = document.createElement('td');
-        viewCountTd.textContent = (viewCount||0).toLocaleString('ja-JP');
+        viewCountTd.textContent = (viewCount || 0).toLocaleString('ja-JP');
         tr.appendChild(viewCountTd);
         const kindTd = document.createElement('td');
         kindTd.textContent = kind > 0 ? "🔴" : "";
