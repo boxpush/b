@@ -291,6 +291,9 @@
     let currentPage = 1;
     let jumpPage = 1;
     let totalPages = 1;
+
+    toTimeStr=t=>new Date(t*1e3).toISOString().substr(t<3600?14:11,t<3600?5:8)
+
     function scrollToElmName(elmName) {
       document.getElementById(elmName).scrollIntoView({ behavior: "smooth" });
     }
@@ -322,7 +325,7 @@
         viewCountTd.textContent = Number(viewCount || 0).toLocaleString('ja-JP');
         tr.appendChild(viewCountTd);
         const durationTd = document.createElement('td');
-        durationTd.textContent = Number(duration || 0);
+        durationTd.textContent = toTimeStr(Number(duration || 0));
         tr.appendChild(durationTd);
         const kindTd = document.createElement('td');
         if ((kind & 8) > 0) {
