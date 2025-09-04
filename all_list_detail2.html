@@ -47,15 +47,19 @@
     td:nth-child(2),
     td:nth-child(3),
     td:nth-child(4),
+    td:nth-child(5),
     th:first-child,
     th:nth-child(2),
     th:nth-child(3),
-    th:nth-child(4) {
+    th:nth-child(4),
+    th:nth-child(5) {
       white-space: nowrap;
       width: 1%;
     }
 
-    td:nth-child(2),td:nth-child(3) {
+    td:nth-child(2),
+    td:nth-child(3),
+    td:nth-child(4) {
       text-align: right;
     }
 
@@ -242,9 +246,10 @@
   <table id="videoTable" style="display:none;">
     <thead>
       <tr>
-        <th>日時</th>
+        <th>登録日時</th>
         <th>視聴回数</th>
         <th>時間</th>
+        <th>開始時刻</th>
         <th>種</th>
         <th>タイトル</th>
       </tr>
@@ -292,8 +297,14 @@
     let jumpPage = 1;
     let totalPages = 1;
 
-    toTimeStr=t=>new Date(t*1e3).toISOString().substr(t<3600?14:11,t<3600?5:8)
-
+    toTimeStr = t => new Date(t * 1e3).toISOString().substr(t < 3600 ? 14 : 11, t < 3600 ? 5 : 8)
+    function formatTime(ms) {
+      const date = new Date(ms);
+      const h = String(date.getUTCHours()).padStart(2, "0");
+      const m = String(date.getUTCMinutes()).padStart(2, "0");
+      const s = String(date.getUTCSeconds()).padStart(2, "0");
+      return `${h}:${m}:${s}`;
+    }
     function scrollToElmName(elmName) {
       document.getElementById(elmName).scrollIntoView({ behavior: "smooth" });
     }
@@ -309,24 +320,29 @@
       const start = 0;
       const end = Math.min(start + PAGE_SIZE, data.length);
       for (let i = start; i < end; i++) {
-        let [videoId, date, title, kind, viewCount,duration] = data[i];
+        let [videoId, date, title, kind, viewCount, duration,actualStartTime,actualEndTime] = data[i];
         videoId = DOMPurify.sanitize(videoId);
         date = DOMPurify.sanitize(date);
         title = DOMPurify.sanitize(title);
         kind = DOMPurify.sanitize(kind);
         viewCount = DOMPurify.sanitize(viewCount);
         duration = DOMPurify.sanitize(duration);
+        actualStartTime = DOMPurify.sanitize(actualStartTime);  
+        actualEndTime = DOMPurify.sanitize(actualEndTime);
         const tr = document.createElement('tr');
 
         const dateTd = document.createElement('td');
         dateTd.textContent = date;
         tr.appendChild(dateTd);
         const viewCountTd = document.createElement('td');
-        viewCountTd.textContent = !viewCount?"": Number(viewCount || 0).toLocaleString('ja-JP');
+        viewCountTd.textContent = !viewCount ? "" : Number(viewCount || 0).toLocaleString('ja-JP');
         tr.appendChild(viewCountTd);
         const durationTd = document.createElement('td');
-        durationTd.textContent = !duration?"":toTimeStr(Number(duration || 0));
+        durationTd.textContent = !duration ? "" : toTimeStr(Number(duration || 0));
         tr.appendChild(durationTd);
+        const actualStartTimeTd = document.createElement('td');
+        actualStartTimeTd.textContent = !actualStartTime ? "" : formatTime(Number(actualStartTime || 0));
+        tr.appendChild(actualStartTimeTd);
         const kindTd = document.createElement('td');
         if ((kind & 8) > 0) {
           kindTd.textContent = "🍰";
@@ -358,7 +374,7 @@
         document.getElementById(`firstBtn${pos}`).disabled = currentPage === 1;
         document.getElementById(`lastBtn${pos}`).disabled = currentPage === totalPages;
       });
-//      scrollToElmName("paginationTop")
+      //      scrollToElmName("paginationTop")
     }
 
     async function loadData() {
@@ -373,14 +389,14 @@
         const desc = searchInput2.value.trim();
         const regex_checked = regex.checked ? 1 : 0;
         const regex2_checked = regex2.checked ? 1 : 0;
-        let kind = normal.checked?1:0;
-        kind += live.checked?6:0;
-        kind += short.checked?8:0;
+        let kind = normal.checked ? 1 : 0;
+        kind += live.checked ? 6 : 0;
+        kind += short.checked ? 8 : 0;
         if (kind == 0) {
           normal.checked = true;
           live.checked = true;
           short.checked = true;
-          kind = 1+2+4+8;
+          kind = 1 + 2 + 4 + 8;
         }
 
         const url = `https://boxpush.d4df816be9225fab.workers.dev/video`;
