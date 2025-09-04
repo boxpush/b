@@ -340,7 +340,7 @@
         const tr = document.createElement('tr');
 
         const dateTd = document.createElement('td');
-        dateTd.textContent = date=="0"?"":formatYMDHM(date);
+        dateTd.textContent = date=="0"?"":formatYMDHM(Number(date));
         tr.appendChild(dateTd);
         const viewCountTd = document.createElement('td');
         viewCountTd.textContent = viewCount == "0" ? "" : Number(viewCount || 0).toLocaleString('ja-JP');
