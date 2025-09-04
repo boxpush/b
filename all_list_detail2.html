@@ -45,9 +45,12 @@
 
     td:first-child,
     td:nth-child(2),
-    td:nth-child(3) th:first-child,
+    td:nth-child(3),
+    td:nth-child(4),
+    th:first-child,
     th:nth-child(2),
-    th:nth-child(3) {
+    th:nth-child(3),
+    th:nth-child(4) {
       white-space: nowrap;
       width: 1%;
     }
@@ -241,6 +244,7 @@
       <tr>
         <th>日時</th>
         <th>視聴回数</th>
+        <th>時間</th>
         <th>種</th>
         <th>タイトル</th>
       </tr>
@@ -302,10 +306,13 @@
       const start = 0;
       const end = Math.min(start + PAGE_SIZE, data.length);
       for (let i = start; i < end; i++) {
-        let [videoId, date, title, kind, viewCount] = data[i];
+        let [videoId, date, title, kind, viewCount,duration] = data[i];
         videoId = DOMPurify.sanitize(videoId);
         date = DOMPurify.sanitize(date);
         title = DOMPurify.sanitize(title);
+        kind = DOMPurify.sanitize(kind);
+        viewCount = DOMPurify.sanitize(viewCount);
+        duration = DOMPurify.sanitize(duration);
         const tr = document.createElement('tr');
 
         const dateTd = document.createElement('td');
@@ -314,6 +321,9 @@
         const viewCountTd = document.createElement('td');
         viewCountTd.textContent = Number(viewCount || 0).toLocaleString('ja-JP');
         tr.appendChild(viewCountTd);
+        const durationTd = document.createElement('td');
+        durationTd.textContent = Number(duration || 0);
+        tr.appendChild(durationTd);
         const kindTd = document.createElement('td');
         if ((kind & 8) > 0) {
           kindTd.textContent = "🍰";
