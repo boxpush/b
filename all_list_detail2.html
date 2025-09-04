@@ -322,10 +322,10 @@
         dateTd.textContent = date;
         tr.appendChild(dateTd);
         const viewCountTd = document.createElement('td');
-        viewCountTd.textContent = Number(viewCount || 0).toLocaleString('ja-JP');
+        viewCountTd.textContent = !viewCount?"": Number(viewCount || 0).toLocaleString('ja-JP');
         tr.appendChild(viewCountTd);
         const durationTd = document.createElement('td');
-        durationTd.textContent = toTimeStr(Number(duration || 0));
+        durationTd.textContent = !duration?"":toTimeStr(Number(duration || 0));
         tr.appendChild(durationTd);
         const kindTd = document.createElement('td');
         if ((kind & 8) > 0) {
