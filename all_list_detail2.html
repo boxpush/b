@@ -249,8 +249,8 @@
         <th>登録日時</th>
         <th>視聴回数</th>
         <th>時間</th>
-        <th>開始時刻</th>
         <th>種</th>
+        <th>開始時刻</th>
         <th>タイトル</th>
       </tr>
     </thead>
@@ -340,9 +340,6 @@
         const durationTd = document.createElement('td');
         durationTd.textContent = duration=="0" ? "" : toTimeStr(Number(duration || 0));
         tr.appendChild(durationTd);
-        const actualStartTimeTd = document.createElement('td');
-        actualStartTimeTd.textContent = !ctualStartTime=="0" ? "" : formatTime(Number(actualStartTime || 0));
-        tr.appendChild(actualStartTimeTd);
         const kindTd = document.createElement('td');
         if ((kind & 8) > 0) {
           kindTd.textContent = "🍰";
@@ -354,6 +351,9 @@
           kindTd.textContent = "";
         }
         tr.appendChild(kindTd);
+        const actualStartTimeTd = document.createElement('td');
+        actualStartTimeTd.textContent = actualStartTime=="0" ? "" : formatTime(Number(actualStartTime || 0));
+        tr.appendChild(actualStartTimeTd);
         const titleTd = document.createElement('td');
         const a = document.createElement('a');
         a.href = `https://www.youtube.com/watch?v=${videoId}`;
