@@ -299,7 +299,7 @@
 
     toTimeStr = t => new Date(t * 1e3).toISOString().substr(t < 3600 ? 14 : 11, t < 3600 ? 5 : 8)
     function formatTime(ms) {
-      const date = new Date(ms);
+      const date = new Date(ms + 9 * 60 * 60 * 1000);
       const h = String(date.getUTCHours()).padStart(2, "0");
       const m = String(date.getUTCMinutes()).padStart(2, "0");
       const s = String(date.getUTCSeconds()).padStart(2, "0");
@@ -335,13 +335,13 @@
         dateTd.textContent = date;
         tr.appendChild(dateTd);
         const viewCountTd = document.createElement('td');
-        viewCountTd.textContent = !viewCount ? "" : Number(viewCount || 0).toLocaleString('ja-JP');
+        viewCountTd.textContent = viewCount=="0" ? "" : Number(viewCount || 0).toLocaleString('ja-JP');
         tr.appendChild(viewCountTd);
         const durationTd = document.createElement('td');
-        durationTd.textContent = !duration ? "" : toTimeStr(Number(duration || 0));
+        durationTd.textContent = duration=="0" ? "" : toTimeStr(Number(duration || 0));
         tr.appendChild(durationTd);
         const actualStartTimeTd = document.createElement('td');
-        actualStartTimeTd.textContent = !actualStartTime ? "" : formatTime(Number(actualStartTime || 0));
+        actualStartTimeTd.textContent = !ctualStartTime=="0" ? "" : formatTime(Number(actualStartTime || 0));
         tr.appendChild(actualStartTimeTd);
         const kindTd = document.createElement('td');
         if ((kind & 8) > 0) {
