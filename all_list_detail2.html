@@ -246,11 +246,12 @@
   <table id="videoTable" style="display:none;">
     <thead>
       <tr>
-        <th>登録/更新</th>
+        <th>登録/更新日</th>
         <th>視聴回数</th>
         <th>時間</th>
         <th>種</th>
         <th>開始</th>
+        <th></th>
         <th>タイトル</th>
       </tr>
     </thead>
@@ -305,7 +306,7 @@
       return `${h}:${m}`;
     }
     function formatYMDHM(ms) {
-      const date = new Date(ms+ 9 * 60 * 60 * 1000);
+      const date = new Date(ms);
       const y = date.getFullYear();
       const m = String(date.getMonth() + 1).padStart(2, "0"); // 月は0始まり
       const d = String(date.getDate()).padStart(2, "0");
@@ -362,6 +363,15 @@
         const actualStartTimeTd = document.createElement('td');
         actualStartTimeTd.textContent = actualStartTime == "0" ? "" : formatTime(Number(actualStartTime || 0));
         tr.appendChild(actualStartTimeTd);
+        const imgTd = document.createElement('td');
+        const img = document.createElement('img');
+        img.src = `https://i.ytimg.com/vi/${videoId}/default.jpg`;
+        img.style.maxWidth = "100%";
+        img.style.maxHeight = "100%";
+        img.style.objectFit = "contain";
+        imgTd.appendChild(img);
+        tr.appendChild(imgTd);
+
         const titleTd = document.createElement('td');
         const a = document.createElement('a');
         a.href = `https://www.youtube.com/watch?v=${videoId}`;
