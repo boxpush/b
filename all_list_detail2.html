@@ -246,11 +246,11 @@
   <table id="videoTable" style="display:none;">
     <thead>
       <tr>
-        <th>登録日時</th>
+        <th>登録/更新</th>
         <th>視聴回数</th>
         <th>時間</th>
         <th>種</th>
-        <th>開始時刻</th>
+        <th>開始</th>
         <th>タイトル</th>
       </tr>
     </thead>
@@ -302,8 +302,16 @@
       const date = new Date(ms + 9 * 60 * 60 * 1000);
       const h = String(date.getUTCHours()).padStart(2, "0");
       const m = String(date.getUTCMinutes()).padStart(2, "0");
-      const s = String(date.getUTCSeconds()).padStart(2, "0");
-      return `${h}:${m}:${s}`;
+      return `${h}:${m}`;
+    }
+    function formatYMDHM(ms) {
+      const date = new Date(ms+ 9 * 60 * 60 * 1000);
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0"); // 月は0始まり
+      const d = String(date.getDate()).padStart(2, "0");
+      const h = String(date.getHours()).padStart(2, "0");
+      const min = String(date.getMinutes()).padStart(2, "0");
+      return `${y}-${m}-${d} ${h}:${min}`;
     }
     function scrollToElmName(elmName) {
       document.getElementById(elmName).scrollIntoView({ behavior: "smooth" });
@@ -320,25 +328,25 @@
       const start = 0;
       const end = Math.min(start + PAGE_SIZE, data.length);
       for (let i = start; i < end; i++) {
-        let [videoId, date, title, kind, viewCount, duration,actualStartTime,actualEndTime] = data[i];
+        let [videoId, date, title, kind, viewCount, duration, actualStartTime, actualEndTime] = data[i];
         videoId = DOMPurify.sanitize(videoId);
         date = DOMPurify.sanitize(date);
         title = DOMPurify.sanitize(title);
         kind = DOMPurify.sanitize(kind);
         viewCount = DOMPurify.sanitize(viewCount);
         duration = DOMPurify.sanitize(duration);
-        actualStartTime = DOMPurify.sanitize(actualStartTime);  
+        actualStartTime = DOMPurify.sanitize(actualStartTime);
         actualEndTime = DOMPurify.sanitize(actualEndTime);
         const tr = document.createElement('tr');
 
         const dateTd = document.createElement('td');
-        dateTd.textContent = date;
+        dateTd.textContent = date=="0"?"":formatYMDHM(date);
         tr.appendChild(dateTd);
         const viewCountTd = document.createElement('td');
-        viewCountTd.textContent = viewCount=="0" ? "" : Number(viewCount || 0).toLocaleString('ja-JP');
+        viewCountTd.textContent = viewCount == "0" ? "" : Number(viewCount || 0).toLocaleString('ja-JP');
         tr.appendChild(viewCountTd);
         const durationTd = document.createElement('td');
-        durationTd.textContent = duration=="0" ? "" : toTimeStr(Number(duration || 0));
+        durationTd.textContent = duration == "0" ? "" : toTimeStr(Number(duration || 0));
         tr.appendChild(durationTd);
         const kindTd = document.createElement('td');
         if ((kind & 8) > 0) {
@@ -352,7 +360,7 @@
         }
         tr.appendChild(kindTd);
         const actualStartTimeTd = document.createElement('td');
-        actualStartTimeTd.textContent = actualStartTime=="0" ? "" : formatTime(Number(actualStartTime || 0));
+        actualStartTimeTd.textContent = actualStartTime == "0" ? "" : formatTime(Number(actualStartTime || 0));
         tr.appendChild(actualStartTimeTd);
         const titleTd = document.createElement('td');
         const a = document.createElement('a');
