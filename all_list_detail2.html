@@ -251,7 +251,7 @@
         <th>時間</th>
         <th>種</th>
         <th>開始</th>
-        <th></th>
+        <th id="thumbnail"></th>
         <th>タイトル</th>
       </tr>
     </thead>
@@ -293,6 +293,8 @@
     const regex = document.getElementById('regex');
     const regex2 = document.getElementById('regex2');
     const loading = document.getElementById('loading');
+    const thumbnail = document.getElementById('thumbnail');
+    thumbnail.display="none";
     let videos = [];
     let currentPage = 1;
     let jumpPage = 1;
@@ -341,13 +343,13 @@
         const tr = document.createElement('tr');
 
         const dateTd = document.createElement('td');
-        dateTd.textContent = date=="0"?"":formatYMDHM(Number(date));
+        dateTd.textContent = date==0?"":formatYMDHM(Number(date));
         tr.appendChild(dateTd);
         const viewCountTd = document.createElement('td');
-        viewCountTd.textContent = viewCount == "0" ? "" : Number(viewCount || 0).toLocaleString('ja-JP');
+        viewCountTd.textContent = viewCount == 0 ? "" : Number(viewCount || 0).toLocaleString('ja-JP');
         tr.appendChild(viewCountTd);
         const durationTd = document.createElement('td');
-        durationTd.textContent = duration == "0" ? "" : toTimeStr(Number(duration || 0));
+        durationTd.textContent = duration == 0 ? "" : toTimeStr(Number(duration || 0));
         tr.appendChild(durationTd);
         const kindTd = document.createElement('td');
         if ((kind & 8) > 0) {
@@ -361,16 +363,16 @@
         }
         tr.appendChild(kindTd);
         const actualStartTimeTd = document.createElement('td');
-        actualStartTimeTd.textContent = actualStartTime == "0" ? "" : formatTime(Number(actualStartTime || 0));
+        actualStartTimeTd.textContent = actualStartTime == 0 ? "" : formatTime(Number(actualStartTime || 0));
         tr.appendChild(actualStartTimeTd);
-        const imgTd = document.createElement('td');
-        const img = document.createElement('img');
-        img.src = `https://i.ytimg.com/vi/${videoId}/default.jpg`;
-        img.style.maxWidth = "100%";
-        img.style.maxHeight = "100%";
-        img.style.objectFit = "contain";
-        imgTd.appendChild(img);
-        tr.appendChild(imgTd);
+        // const imgTd = document.createElement('td');
+        // const img = document.createElement('img');
+        // img.src = `https://i.ytimg.com/vi/${videoId}/default.jpg`;
+        // img.style.maxWidth = "100%";
+        // img.style.maxHeight = "100%";
+        // img.style.objectFit = "contain";
+        // imgTd.appendChild(img);
+        // tr.appendChild(imgTd);
 
         const titleTd = document.createElement('td');
         const a = document.createElement('a');
@@ -423,7 +425,6 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ keywords: keywords, desc: desc, regex: regex_checked, regex2: regex2_checked, since: since.value, until: until.value, minTime: minTime.value, maxTime: maxTime.value, minView: minView.value, maxView: maxView.value, minLike: minLike.value, maxLike: maxLike.value, minFavorite: minFavorite.value, maxFavorite: maxFavorite.value, minComment: minComment.value, maxComment: maxComment.value, kind: kind, page: page })
         });
-
         if (!res.ok) throw new Error('取得に失敗しました');
         const text = await res.json();
         result = text.result;
