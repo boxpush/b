@@ -213,6 +213,7 @@
     <label><input type="checkbox" id="normal" checked="checked">通常</label>
     <label><input type="checkbox" id="live" checked="checked">ライブ</label>
     <label><input type="checkbox" id="short" checked="checked">ショート</label>
+    <label><input type="checkbox" id="is_thumbnail">サムネ表示</label>
     <div class="container">
       <div class="left-column">
         <div class="row">
@@ -251,7 +252,7 @@
         <th>時間</th>
         <th>種</th>
         <th>開始</th>
-        <th id="thumbnail"></th>
+        <th class="thumbnail_col"></th>
         <th>タイトル</th>
       </tr>
     </thead>
@@ -294,7 +295,7 @@
     const regex2 = document.getElementById('regex2');
     const loading = document.getElementById('loading');
     const thumbnail = document.getElementById('thumbnail');
-    thumbnail.display="none";
+    thumbnail.display = "none";
     let videos = [];
     let currentPage = 1;
     let jumpPage = 1;
@@ -343,7 +344,7 @@
         const tr = document.createElement('tr');
 
         const dateTd = document.createElement('td');
-        dateTd.textContent = date==0?"":formatYMDHM(Number(date));
+        dateTd.textContent = date == 0 ? "" : formatYMDHM(Number(date));
         tr.appendChild(dateTd);
         const viewCountTd = document.createElement('td');
         viewCountTd.textContent = viewCount == 0 ? "" : Number(viewCount || 0).toLocaleString('ja-JP');
@@ -365,15 +366,21 @@
         const actualStartTimeTd = document.createElement('td');
         actualStartTimeTd.textContent = actualStartTime == 0 ? "" : formatTime(Number(actualStartTime || 0));
         tr.appendChild(actualStartTimeTd);
-        // const imgTd = document.createElement('td');
-        // const img = document.createElement('img');
-        // img.src = `https://i.ytimg.com/vi/${videoId}/default.jpg`;
-        // img.style.maxWidth = "100%";
-        // img.style.maxHeight = "100%";
-        // img.style.objectFit = "contain";
-        // imgTd.appendChild(img);
-        // tr.appendChild(imgTd);
-
+        const imgTd = document.createElement('td');
+        imgTd.style.display = "none";
+        if (is_thumbnail.checked) {
+          imgTd.style.display = "table-cell";
+          thumbnail.style.display = "table-cell";
+          const img = document.createElement('img');
+          img.src = `https://i.ytimg.com/vi/${videoId}/default.jpg`;
+          img.style.maxWidth = "100%";
+          img.style.maxHeight = "100%";
+          img.style.objectFit = "contain";
+          imgTd.appendChild(img);
+        } else {
+          thumbnail.style.display = "none";
+        }
+        tr.appendChild(imgTd);
         const titleTd = document.createElement('td');
         const a = document.createElement('a');
         a.href = `https://www.youtube.com/watch?v=${videoId}`;
