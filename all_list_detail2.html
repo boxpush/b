@@ -294,8 +294,8 @@
     const regex = document.getElementById('regex');
     const regex2 = document.getElementById('regex2');
     const loading = document.getElementById('loading');
-    const thumbnail = document.getElementById('thumbnail');
-    thumbnail.display = "none";
+    const thumbnail_col = document.getElementById('thumbnail_col');
+    thumbnail_col.style.display = "none";
     let videos = [];
     let currentPage = 1;
     let jumpPage = 1;
@@ -370,7 +370,7 @@
         imgTd.style.display = "none";
         if (is_thumbnail.checked) {
           imgTd.style.display = "table-cell";
-          thumbnail.style.display = "table-cell";
+          thumbnail_col.style.display = "table-cell";
           const img = document.createElement('img');
           img.src = `https://i.ytimg.com/vi/${videoId}/default.jpg`;
           img.style.maxWidth = "100%";
@@ -378,7 +378,7 @@
           img.style.objectFit = "contain";
           imgTd.appendChild(img);
         } else {
-          thumbnail.style.display = "none";
+          thumbnail_col.style.display = "none";
         }
         tr.appendChild(imgTd);
         const titleTd = document.createElement('td');
