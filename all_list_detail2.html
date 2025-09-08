@@ -363,10 +363,16 @@
         if ((kind & 8) > 0) {
           kindTd.textContent = "🍰";
         } else if ((kind & 6) > 0) {
-          if (actualEndTime > 0) {
+          if (actualStartTime > 0) {
+            if (actualEndTime > 0) {
+              kindTd.textContent = "🔵";
+            } else {
+            //actualEndTimeなし
             kindTd.textContent = "🔴";
+            }
           } else {
-            kindTd.textContent = "🔵";
+            //actualStartTimeなし
+            kindTd.textContent = "⚪";
           }
         } else {
           kindTd.textContent = "";
