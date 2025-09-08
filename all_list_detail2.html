@@ -237,7 +237,7 @@
     <button id="firstBtnTop" disabled>最初へ</button>
     <button id="prevBtnTop" disabled>前へ</button>
     <span id="pageInfoTop"></span>
-    <input type="number" id="pageInputTop" min="1" style="width: 50px; text-align: right;" />
+    <input type="number" id="pageInputTop" min="1" style="width: 100px; text-align: right;" />
     <button id="jumpBtnTop">ジャンプ</button>
     <button id="nextBtnTop" disabled>次へ</button>
     <button id="lastBtnTop" disabled>最後へ</button>
@@ -252,6 +252,7 @@
         <th>時間</th>
         <th>種</th>
         <th>開始</th>
+        <th>同接</th>
         <th id="thumbnail_col"></th>
         <th>タイトル</th>
       </tr>
@@ -263,7 +264,7 @@
     <button id="firstBtnBottom" disabled>最初へ</button>
     <button id="prevBtnBottom" disabled>前へ</button>
     <span id="pageInfoBottom"></span>
-    <input type="number" id="pageInputBottom" min="1" style="width: 50px; text-align: right;" />
+    <input type="number" id="pageInputBottom" min="1" style="width: 100px; text-align: right;" />
     <button id="jumpBtnBottom">ジャンプ</button>
     <button id="nextBtnBottom" disabled>次へ</button>
     <button id="lastBtnBottom" disabled>最後へ</button>
@@ -332,7 +333,7 @@
       const start = 0;
       const end = Math.min(start + PAGE_SIZE, data.length);
       for (let i = start; i < end; i++) {
-        let [videoId, date, title, kind, viewCount, duration, actualStartTime, actualEndTime] = data[i];
+        let [videoId, date, title, kind, viewCount, duration, actualStartTime, actualEndTime,viewers] = data[i];
         videoId = DOMPurify.sanitize(videoId);
         date = DOMPurify.sanitize(date);
         title = DOMPurify.sanitize(title);
@@ -341,17 +342,21 @@
         duration = DOMPurify.sanitize(duration);
         actualStartTime = DOMPurify.sanitize(actualStartTime);
         actualEndTime = DOMPurify.sanitize(actualEndTime);
+        viewers = DOMPurify.sanitize(viewers);
         const tr = document.createElement('tr');
-
+        //日付
         const dateTd = document.createElement('td');
         dateTd.textContent = date == 0 ? "" : formatYMDHM(Number(date));
         tr.appendChild(dateTd);
+        //視聴回数
         const viewCountTd = document.createElement('td');
         viewCountTd.textContent = viewCount == 0 ? "" : Number(viewCount || 0).toLocaleString('ja-JP');
         tr.appendChild(viewCountTd);
+        //再生時間
         const durationTd = document.createElement('td');
         durationTd.textContent = duration == 0 ? "" : toTimeStr(Number(duration || 0));
         tr.appendChild(durationTd);
+        //種別
         const kindTd = document.createElement('td');
         if ((kind & 8) > 0) {
           kindTd.textContent = "🍰";
@@ -363,9 +368,15 @@
           kindTd.textContent = "";
         }
         tr.appendChild(kindTd);
+        //開始時刻
         const actualStartTimeTd = document.createElement('td');
         actualStartTimeTd.textContent = actualStartTime == 0 ? "" : formatTime(Number(actualStartTime || 0));
         tr.appendChild(actualStartTimeTd);
+        //同時接続数
+        const viewersTd = document.createElement('td');
+        viewersTd.textContent = viewers == 0 ? "" : Number(viewers || 0).toLocaleString('ja-JP');
+        tr.appendChild(viewersTd);
+        //サムネ
         const imgTd = document.createElement('td');
         imgTd.style.display = "none";
         if (is_thumbnail.checked) {
