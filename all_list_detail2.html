@@ -335,7 +335,7 @@
       const start = 0;
       const end = Math.min(start + PAGE_SIZE, data.length);
       for (let i = start; i < end; i++) {
-        let [videoId, date, title, kind, viewCount, duration, actualStartTime, actualEndTime,viewers] = data[i];
+        let [videoId, date, title, kind, viewCount, duration, actualStartTime, actualEndTime, viewers] = data[i];
         videoId = DOMPurify.sanitize(videoId);
         date = DOMPurify.sanitize(date);
         title = DOMPurify.sanitize(title);
@@ -566,6 +566,15 @@
           goPage(pageInput.value);
         }
       });
+    });
+    window.addEventListener("load", () => {
+      const checked = localStorage.getItem("is_thumbnail");
+      if (checked !== null) {
+        is_thumbnail.checked = checked === "true";
+      }
+    });
+    is_thumbnail.addEventListener("change", () => {
+      localStorage.setItem("is_thumbnail", is_thumbnail.checked);
     });
 
     // ページ読み込み時に初期ワードで検索
