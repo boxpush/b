@@ -362,10 +362,12 @@
         const kindTd = document.createElement('td');
         if ((kind & 8) > 0) {
           kindTd.textContent = "🍰";
-        } else if ((kind & 4) > 0) {
-          kindTd.textContent = "🔴";
-        } else if ((kind & 2) > 0) {
-          kindTd.textContent = "🔴";
+        } else if ((kind & 6) > 0) {
+          if (actualEndTime > 0) {
+            kindTd.textContent = "🔴";
+          } else {
+            kindTd.textContent = "🔵";
+          }
         } else {
           kindTd.textContent = "";
         }
