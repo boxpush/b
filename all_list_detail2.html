@@ -365,14 +365,14 @@
         } else if ((kind & 6) > 0) {
           if (actualStartTime > 0) {
             if (actualEndTime > 0) {
-              kindTd.textContent = "🔵";
+              kindTd.textContent = "⚪";
             } else {
             //actualEndTimeなし
             kindTd.textContent = "🔴";
             }
           } else {
             //actualStartTimeなし
-            kindTd.textContent = "⚪";
+            kindTd.textContent = "🔵";
           }
         } else {
           kindTd.textContent = "";
