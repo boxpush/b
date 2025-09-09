@@ -447,7 +447,7 @@
         const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ keywords: keywords, desc: desc, regex: regex_checked, regex2: regex2_checked, since: since.value, until: until.value, minTime: minTime.value, maxTime: maxTime.value, minView: minView.value, maxView: maxView.value, minLike: minLike.value, maxLike: maxLike.value, minFavorite: minFavorite.value, maxFavorite: maxFavorite.value, minComment: minComment.value, maxComment: maxComment.value, kind: kind,sort:sort.value, page: page })
+          body: JSON.stringify({ keywords: keywords, desc: desc, regex: regex_checked, regex2: regex2_checked, since: since.value, until: until.value, minTime: minTime.value, maxTime: maxTime.value, minView: minView.value, maxView: maxView.value, minLike: minLike.value, maxLike: maxLike.value, minComment: minComment.value, maxComment: maxComment.value, kind: kind,sort:sort.value, page: page })
         });
         if (!res.ok) throw new Error('取得に失敗しました');
         const text = await res.json();
@@ -539,8 +539,6 @@
       maxView.value = '';
       minLike.value = '';
       maxLike.value = '';
-      minFavorite.value = '';
-      maxFavorite.value = '';
       minComment.value = '';
       maxComment.value = '';
       normal.checked = true;
