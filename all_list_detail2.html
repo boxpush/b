@@ -202,9 +202,11 @@
     </div>
     <div>
       <div class="search-item-group">
-        <span title="deprecated">❤️</span>
-        <input type="text" class="searchField" id="minFavorite" placeholder="廃止" value="" style="width: 64px;" />～
-        <input type="text" class="searchField" id="maxFavorite" placeholder="" value="" style="width: 64px;" />
+        <span title="結果ソート">結果ソート</span>
+        <select id="sort">
+          <option value="0">登録順</option>
+          <option value="1">放送順</option>
+        </select>
       </div>
       <div class="search-item-group">
         <span title="コメント数">💬</span>
@@ -290,9 +292,11 @@
     const maxFavorite = document.getElementById('maxFavorite');
     const minComment = document.getElementById('minComment');
     const maxComment = document.getElementById('maxComment');
+    const sort = document.getElementById('sort');
     const normal = document.getElementById('normal');
     const live = document.getElementById('live');
     const short = document.getElementById('short');
+    const is_thumbnail = document.getElementById('is_thumbnail');
     const tbody = document.querySelector('#videoTable tbody');
     const regex = document.getElementById('regex');
     const regex2 = document.getElementById('regex2');
@@ -360,20 +364,14 @@
         tr.appendChild(durationTd);
         //種別
         const kindTd = document.createElement('td');
-        if ((kind & 8) > 0) {
+        if ((kind & 2) > 0) {
           kindTd.textContent = "🍰";
-        } else if ((kind & 6) > 0) {
-          if (actualStartTime > 0) {
-            if (actualEndTime > 0) {
-              kindTd.textContent = "⚪";
-            } else {
-            //actualEndTimeなし
-            kindTd.textContent = "🔴";
-            }
-          } else {
-            //actualStartTimeなし
-            kindTd.textContent = "🔵";
-          }
+        } else if ((kind & 8) > 0) {
+          kindTd.textContent = "🔵";
+        } else if ((kind & 16) > 0) {
+          kindTd.textContent = "🔴";
+        } else if ((kind & 32) > 0) {
+          kindTd.textContent = "⚪";
         } else {
           kindTd.textContent = "";
         }
@@ -438,20 +436,20 @@
         const regex_checked = regex.checked ? 1 : 0;
         const regex2_checked = regex2.checked ? 1 : 0;
         let kind = normal.checked ? 1 : 0;
-        kind += live.checked ? 6 : 0;
-        kind += short.checked ? 8 : 0;
+        kind += live.checked ? 4 : 0;
+        kind += short.checked ? 2 : 0;
         if (kind == 0) {
           normal.checked = true;
           live.checked = true;
           short.checked = true;
-          kind = 1 + 2 + 4 + 8;
+          kind = 1 + 2 + 4;
         }
 
         const url = `https://boxpush.d4df816be9225fab.workers.dev/video`;
         const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ keywords: keywords, desc: desc, regex: regex_checked, regex2: regex2_checked, since: since.value, until: until.value, minTime: minTime.value, maxTime: maxTime.value, minView: minView.value, maxView: maxView.value, minLike: minLike.value, maxLike: maxLike.value, minFavorite: minFavorite.value, maxFavorite: maxFavorite.value, minComment: minComment.value, maxComment: maxComment.value, kind: kind, page: page })
+          body: JSON.stringify({ keywords: keywords, desc: desc, regex: regex_checked, regex2: regex2_checked, since: since.value, until: until.value, minTime: minTime.value, maxTime: maxTime.value, minView: minView.value, maxView: maxView.value, minLike: minLike.value, maxLike: maxLike.value, minFavorite: minFavorite.value, maxFavorite: maxFavorite.value, minComment: minComment.value, maxComment: maxComment.value, kind: kind,sort:sort.value, page: page })
         });
         if (!res.ok) throw new Error('取得に失敗しました');
         const text = await res.json();
@@ -576,17 +574,44 @@
       });
     });
     window.addEventListener("load", () => {
-      const checked = localStorage.getItem("is_thumbnail");
-      if (checked !== null) {
-        is_thumbnail.checked = checked === "true";
+      let is_check = localStorage.getItem("is_thumbnail");
+      if (is_check !== null) {
+        is_thumbnail.checked = is_check === "true";
       }
+      is_check = localStorage.getItem("normal");
+      if (is_check !== null) {
+        normal.checked = is_check === "true";
+      }
+      is_check = localStorage.getItem("live");
+      if (is_check !== null) {
+        live.checked = is_check === "true";
+      }
+      is_check = localStorage.getItem("short");
+      if (is_check !== null) {
+        short.checked = is_check === "true";
+      }
+      const selected = localStorage.getItem("sort");
+      if (selected !== null) {
+        sort.value = selected;
+      }
+      // ページ読み込み時に初期ワードで検索
+      applyFilter();
+    });
+    normal.addEventListener("change", () => {
+      localStorage.setItem("normal", normal.checked);
+    });
+    live.addEventListener("change", () => {
+      localStorage.setItem("live", live.checked);
+    });
+    short.addEventListener("change", () => {
+      localStorage.setItem("short", short.checked);
     });
     is_thumbnail.addEventListener("change", () => {
       localStorage.setItem("is_thumbnail", is_thumbnail.checked);
     });
-
-    // ページ読み込み時に初期ワードで検索
-    applyFilter();
+    sort.addEventListener("change", () => {
+      localStorage.setItem("sort", sort.value);
+    });
   </script>
 </body>
 
