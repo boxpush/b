@@ -655,6 +655,25 @@
       modal.addEventListener('click', () => {
         document.body.removeChild(modal);
       });
+      const urls = [
+        `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+        `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
+        `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+      ];
+      let index = 0;
+      function tryNext() {
+        if (index >= urls.length) return;
+        const testImg = new Image();
+        testImg.onload = () => {
+          popupImg.src = urls[index];
+        };
+        testImg.onerror = () => {
+          index++;
+          tryNext();
+        };
+        testImg.src = urls[index];
+      }
+      tryNext();
     }
 
   </script>
