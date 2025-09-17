@@ -658,7 +658,8 @@
       const urls = [
         `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
         `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
-        `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+        `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+        `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
       ];
       let index = 0;
       function tryNext() {
@@ -666,6 +667,7 @@
         const testImg = new Image();
         testImg.onload = () => {
           popupImg.src = urls[index];
+          adjustSize();
         };
         testImg.onerror = () => {
           index++;
@@ -674,6 +676,16 @@
         testImg.src = urls[index];
       }
       tryNext();
+      function adjustSize() {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const padding = 0.05;
+        const maxWidth = vw * (1 - padding * 2);
+        const maxHeight = vh * (1 - padding * 2);
+        popupImg.style.maxWidth = maxWidth + "px";
+        popupImg.style.maxHeight = maxHeight + "px";
+      }
+      window.addEventListener('resize', adjustSize);
     }
 
   </script>
