@@ -665,8 +665,13 @@
         if (index >= urls.length) return;
         const testImg = new Image();
         testImg.onload = () => {
-          popupImg.src = urls[index];
-          adjustSize();
+          if (testImg.naturalWidth > 90 && testImg.naturalHeight > 90) {
+            popupImg.src = urls[index];
+            adjustSize();
+          } else {
+            index++;
+            tryNext();
+          }
         };
         testImg.onerror = () => {
           index++;
