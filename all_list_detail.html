@@ -424,6 +424,7 @@
           img.style.maxHeight = "100%";
           img.style.objectFit = "contain";
           img.setAttribute('data-vid', videoId);
+          img.addEventListener('click', () => showPopup(img));
           imgTd.appendChild(img);
         } else {
           thumbnail_col.style.display = "none";
@@ -626,7 +627,8 @@
     sort.addEventListener("change", () => {
       localStorage.setItem("sort", sort.value);
     });
-    img.addEventListener('click', () => {
+    function showPopup(imgElement) {
+      const videoId = imgElement.getAttribute("data-vid");
       const modal = document.createElement('div');
       modal.style.position = "fixed";
       modal.style.top = 0;
@@ -642,29 +644,18 @@
 
       const popupImg = document.createElement('img');
       popupImg.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-      popupImg.style.maxWidth = "100%";
-      popupImg.style.maxHeight = "100%";
+      popupImg.style.maxWidth = "90%";
+      popupImg.style.maxHeight = "90%";
       popupImg.style.objectFit = "contain";
       popupImg.style.cursor = "pointer";
 
       modal.appendChild(popupImg);
       document.body.appendChild(modal);
 
-      const closeModal = () => {
-        window.removeEventListener('resize', adjustSize);
+      modal.addEventListener('click', () => {
         document.body.removeChild(modal);
-      };
-      modal.addEventListener('click', closeModal);
-
-      const adjustSize = () => {
-        const maxWidth = window.innerWidth * 0.9;
-        const maxHeight = window.innerHeight * 0.9;
-        popupImg.style.maxWidth = maxWidth + "px";
-        popupImg.style.maxHeight = maxHeight + "px";
-      };
-      adjustSize();
-      window.addEventListener('resize', adjustSize);
-    });
+      });
+    }
 
   </script>
 </body>
