@@ -639,20 +639,19 @@
       modal.style.display = "flex";
       modal.style.alignItems = "center";
       modal.style.justifyContent = "center";
+      modal.style.overflow = "auto";
       modal.style.zIndex = 1000;
-      modal.style.padding = "5%";
+
 
       const popupImg = document.createElement('img');
-      popupImg.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-      popupImg.style.maxWidth = "90%";
-      popupImg.style.maxHeight = "90%";
       popupImg.style.objectFit = "contain";
       popupImg.style.cursor = "pointer";
-
+      popupImg.style.display = "block";
       modal.appendChild(popupImg);
       document.body.appendChild(modal);
 
       modal.addEventListener('click', () => {
+        window.removeEventListener('resize', adjustSize);
         document.body.removeChild(modal);
       });
       const urls = [
@@ -679,11 +678,8 @@
       function adjustSize() {
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-        const padding = 0.05;
-        const maxWidth = vw * (1 - padding * 2);
-        const maxHeight = vh * (1 - padding * 2);
-        popupImg.style.maxWidth = maxWidth + "px";
-        popupImg.style.maxHeight = maxHeight + "px";
+        popupImg.style.maxWidth = vw + "px";
+        popupImg.style.maxHeight = vh + "px";
       }
       window.addEventListener('resize', adjustSize);
     }
