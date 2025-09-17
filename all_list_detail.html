@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="./favicon.ico" type="image/x-icon">
+  <!-- DOMPurify 2.4.2
+     (c) 2015-2025 Cure53
+     MIT License
+     https://github.com/cure53/DOMPurify
+-->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.2/dist/purify.min.js"></script>
+  <title>動画詳細検索</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1,
+    h2,
+    h3 {
+      text-align: center;
+      color: #333;
+      margin: 20px 0;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      table-layout: auto;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 4px;
+    }
+
+    th {
+      background: #eee;
+    }
+
+    td:first-child,
+    td:nth-child(2),
+    td:nth-child(3),
+    td:nth-child(4),
+    td:nth-child(5),
+    td:nth-child(6),
+    th:first-child,
+    th:nth-child(2),
+    th:nth-child(3),
+    th:nth-child(4),
+    th:nth-child(5),
+    th:nth-child(6) {
+      white-space: nowrap;
+      width: 1%;
+    }
+
+    td:nth-child(2),
+    td:nth-child(3),
+    td:nth-child(6) {
+      text-align: right;
+    }
+
+    nav {
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    button {
+      margin: 0 5px;
+    }
+
+    #searchForm {
+      text-align: center;
+      margin: 2px 0;
+    }
+
+    #searchForm input[type="text"] {
+      width: 350px;
+      padding: 5px;
+    }
+
+    input::placeholder {
+      opacity: 0.6;
+    }
+
+    #searchForm {
+      font-family: sans-serif;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      margin: auto;
+    }
+
+    #searchForm>div {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .search-item-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      width: 48%;
+    }
+
+    .search-item-group>span {
+      font-weight: bold;
+      color: #555;
+      white-space: nowrap;
+    }
+
+    .search-item-group input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      flex-grow: 1;
+      max-width: 100px;
+    }
+
+    #searchInput,
+    #searchInput2 {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    #searchBtn,
+    #clearBtn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #searchBtn {
+      background-color: #007bff;
+      color: white;
+    }
+
+    #clearBtn {
+      background-color: #f1f1f1;
+      color: #555;
+    }
+
+    #back {
+      position: fixed;
+      top: 2px;
+      left: 2px;
+      z-index: 9999;
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 600px) {
+      #back {
+        font-size: 18px;
+        padding: 12px 18px;
+      }
+    }
+
+    .left-column {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+  </style>
+
+</head>
+
+<body>
+  <h2>動画詳細検索</h2>
+  <div id="searchForm">
+    <div>
+      <div class="search-item-group">
+        <span>年月日</span>
+        <input type="text" class="searchField" id="since" placeholder="８桁" value="" style="width: 64px;" />～
+        <input type="text" class="searchField" id="until" placeholder="or ４,６桁" value="" style="width: 64px;" />
+      </div>
+      <div class="search-item-group">
+        <span>時間</span>
+        <input type="text" class="searchField" id="minTime" placeholder="秒数" value="" style="width: 64px;" />～
+        <input type="text" class="searchField" id="maxTime" placeholder="or 2h3m4s" value="" style="width: 64px;" />
+      </div>
+    </div>
+    <div>
+      <div class="search-item-group">
+        <span>視聴回数</span>
+        <input type="text" class="searchField" id="minView" placeholder="整数" value="" style="width: 64px;" />～
+        <input type="text" class="searchField" id="maxView" placeholder="or 1m" value="" style="width: 64px;" />
+      </div>
+      <div class="search-item-group">
+        <span title="高評価">👍</span>
+        <input type="text" class="searchField" id="minLike" placeholder="高評価数" value="" style="width: 64px;" />～
+        <input type="text" class="searchField" id="maxLike" placeholder="" value="" style="width: 64px;" />
+      </div>
+    </div>
+    <div>
+      <div class="search-item-group">
+        <span title="結果ソート">結果ソート</span>
+        <select id="sort">
+          <option value="0" selected="selected">登録順</option>
+          <option value="1">放送・配信予定順</option>
+        </select>
+      </div>
+      <div class="search-item-group">
+        <span title="コメント数">💬</span>
+        <input type="text" class="searchField" id="minComment" placeholder="コメント数" value="" style="width: 64px;" />～
+        <input type="text" class="searchField" id="maxComment" placeholder="" value="" style="width: 64px;" />
+      </div>
+    </div>
+    <label><input type="checkbox" id="normal">通常</label>
+    <label><input type="checkbox" id="live">ライブ</label>
+    <label><input type="checkbox" id="short">ショート</label>
+    <label><input type="checkbox" id="is_thumbnail">サムネ表示</label>
+    <div class="container">
+      <div class="left-column">
+        <div class="row">
+          <label><input type="checkbox" id="regex">Regex</label>
+          <input type="text" id="searchInput" placeholder="スペース区切りでタイトルのAND検索" value="" />
+        </div>
+        <div class="row">
+          <label><input type="checkbox" id="regex2">Regex</label>
+          <input type="text" id="searchInput2" placeholder="スペース区切りで説明のAND検索" value="" />
+        </div>
+      </div>
+      <div class="">
+        <button id="searchBtn">検索</button>
+        <button id="clearBtn">クリア</button>
+      </div>
+    </div>
+
+  </div>
+
+  <nav id="paginationTop" style="display:none;">
+    <button id="firstBtnTop" disabled>最初へ</button>
+    <button id="prevBtnTop" disabled>前へ</button>
+    <span id="pageInfoTop"></span>
+    <input type="number" id="pageInputTop" min="1" style="width: 100px; text-align: right;" />
+    <button id="jumpBtnTop">ジャンプ</button>
+    <button id="nextBtnTop" disabled>次へ</button>
+    <button id="lastBtnTop" disabled>最後へ</button>
+  </nav>
+
+  <div id="loading">読み込み中...</div>
+  <table id="videoTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>登録/更新日</th>
+        <th>視聴回数</th>
+        <th>時間</th>
+        <th>種</th>
+        <th>開始</th>
+        <th>同接</th>
+        <th id="thumbnail_col"></th>
+        <th>タイトル</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <nav id="paginationBottom" style="display:none;">
+    <button id="firstBtnBottom" disabled>最初へ</button>
+    <button id="prevBtnBottom" disabled>前へ</button>
+    <span id="pageInfoBottom"></span>
+    <input type="number" id="pageInputBottom" min="1" style="width: 100px; text-align: right;" />
+    <button id="jumpBtnBottom">ジャンプ</button>
+    <button id="nextBtnBottom" disabled>次へ</button>
+    <button id="lastBtnBottom" disabled>最後へ</button>
+  </nav>
+  <button id="back" onclick="location.href='./'">戻る</button>
+  <script>
+    const PAGE_SIZE = 100;
+    const pageInputTop = document.getElementById('pageInputTop');
+    const pageInputBottom = document.getElementById('pageInputBottom');
+    const searchInput = document.getElementById('searchInput');
+    const searchInput2 = document.getElementById('searchInput2');
+    const since = document.getElementById('since');
+    const until = document.getElementById('until');
+    const minTime = document.getElementById('minTime');
+    const maxTime = document.getElementById('maxTime');
+    const minView = document.getElementById('minView');
+    const maxView = document.getElementById('maxView');
+    const minLike = document.getElementById('minLike');
+    const maxLike = document.getElementById('maxLike');
+    const minComment = document.getElementById('minComment');
+    const maxComment = document.getElementById('maxComment');
+    const sort = document.getElementById('sort');
+    const normal = document.getElementById('normal');
+    const live = document.getElementById('live');
+    const short = document.getElementById('short');
+    const is_thumbnail = document.getElementById('is_thumbnail');
+    const tbody = document.querySelector('#videoTable tbody');
+    const regex = document.getElementById('regex');
+    const regex2 = document.getElementById('regex2');
+    const loading = document.getElementById('loading');
+    const thumbnail_col = document.getElementById('thumbnail_col');
+    thumbnail_col.style.display = "none";
+    let videos = [];
+    let currentPage = 1;
+    let jumpPage = 1;
+    let totalPages = 1;
+
+    toTimeStr = t => new Date(t * 1e3).toISOString().substr(t < 3600 ? 14 : 11, t < 3600 ? 5 : 8)
+    function formatTime(ms) {
+      const date = new Date(ms + 9 * 60 * 60 * 1000);
+      const h = String(date.getUTCHours()).padStart(2, "0");
+      const m = String(date.getUTCMinutes()).padStart(2, "0");
+      return `${h}:${m}`;
+    }
+    function formatYMDHM(ms) {
+      const date = new Date(ms);
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0"); // 月は0始まり
+      const d = String(date.getDate()).padStart(2, "0");
+      const h = String(date.getHours()).padStart(2, "0");
+      const min = String(date.getMinutes()).padStart(2, "0");
+      return `${y}-${m}-${d} ${h}:${min}`;
+    }
+    function scrollToElmName(elmName) {
+      document.getElementById(elmName).scrollIntoView({ behavior: "smooth" });
+    }
+    function setInput(el, value) {
+      if (el.type === "checkbox") {
+        el.checked = value;
+        localStorage.setItem(el.id, el.checked);
+      } else if (el.tagName === "SELECT") {
+        el.value = value;
+        localStorage.setItem(el.id, el.value);
+      }
+    }
+    function loadInput(el) {
+      const stored = localStorage.getItem(el.id);
+      if (stored !== null) {
+        if (el.type === "checkbox") {
+          el.checked = stored === "true";
+        } else if (el.tagName === "SELECT") {
+          el.value = stored;
+        }
+      }
+    }
+
+    function renderPage(page, totalCount) {
+      tbody.innerHTML = '';
+      const data = videos;
+      if (totalPages === 0) totalPages = 1;
+      if (page < 1) page = 1;
+      if (page > totalPages) page = totalPages;
+      currentPage = page;
+
+      const start = 0;
+      const end = Math.min(start + PAGE_SIZE, data.length);
+      for (let i = start; i < end; i++) {
+        let [videoId, date, title, kind, viewCount, duration, actualStartTime, actualEndTime, viewers] = data[i];
+        videoId = DOMPurify.sanitize(videoId);
+        date = DOMPurify.sanitize(date);
+        title = DOMPurify.sanitize(title);
+        kind = DOMPurify.sanitize(kind);
+        viewCount = DOMPurify.sanitize(viewCount);
+        duration = DOMPurify.sanitize(duration);
+        actualStartTime = DOMPurify.sanitize(actualStartTime);
+        actualEndTime = DOMPurify.sanitize(actualEndTime);
+        viewers = DOMPurify.sanitize(viewers);
+        const tr = document.createElement('tr');
+        //日付
+        const dateTd = document.createElement('td');
+        dateTd.textContent = date == 0 ? "" : formatYMDHM(Number(date));
+        tr.appendChild(dateTd);
+        //視聴回数
+        const viewCountTd = document.createElement('td');
+        viewCountTd.textContent = viewCount == 0 ? "" : Number(viewCount || 0).toLocaleString('ja-JP');
+        tr.appendChild(viewCountTd);
+        //再生時間
+        const durationTd = document.createElement('td');
+        durationTd.textContent = duration == 0 ? "" : toTimeStr(Number(duration || 0));
+        tr.appendChild(durationTd);
+        //種別
+        const kindTd = document.createElement('td');
+        if ((kind & 2) > 0) {
+          kindTd.textContent = "🍰";
+        } else if ((kind & 8) > 0) {
+          kindTd.textContent = "🔵";
+        } else if ((kind & 16) > 0) {
+          kindTd.textContent = "🔴";
+        } else if ((kind & 32) > 0) {
+          kindTd.textContent = "⚪";
+        } else {
+          kindTd.textContent = "";
+        }
+        tr.appendChild(kindTd);
+        //開始時刻
+        const actualStartTimeTd = document.createElement('td');
+        actualStartTimeTd.textContent = actualStartTime == 0 ? "" : formatTime(Number(actualStartTime || 0));
+        tr.appendChild(actualStartTimeTd);
+        //同時接続数
+        const viewersTd = document.createElement('td');
+        viewersTd.textContent = viewers == 0 ? "" : Number(viewers || 0).toLocaleString('ja-JP');
+        tr.appendChild(viewersTd);
+        //サムネ
+        const imgTd = document.createElement('td');
+        imgTd.style.display = "none";
+        if (is_thumbnail.checked) {
+          imgTd.style.display = "table-cell";
+          thumbnail_col.style.display = "table-cell";
+          const img = document.createElement('img');
+          img.src = `https://i.ytimg.com/vi/${videoId}/default.jpg`;
+          img.style.maxWidth = "100%";
+          img.style.maxHeight = "100%";
+          img.style.objectFit = "contain";
+          img.setAttribute('data-vid', videoId);
+          imgTd.appendChild(img);
+        } else {
+          thumbnail_col.style.display = "none";
+        }
+        tr.appendChild(imgTd);
+        const titleTd = document.createElement('td');
+        const a = document.createElement('a');
+        a.href = `https://www.youtube.com/watch?v=${videoId}`;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = title;
+        titleTd.appendChild(a);
+        tr.appendChild(titleTd);
+
+        tbody.appendChild(tr);
+      }
+
+      ['Top', 'Bottom'].forEach(pos => {
+        document.getElementById(`pageInfo${pos}`).textContent = `${currentPage} / ${totalPages} (${totalCount}件)`;
+        document.getElementById(`pageInput${pos}`).value = currentPage; // フォームの値を更新
+        document.getElementById(`prevBtn${pos}`).disabled = currentPage === 1;
+        document.getElementById(`nextBtn${pos}`).disabled = currentPage === totalPages;
+        document.getElementById(`firstBtn${pos}`).disabled = currentPage === 1;
+        document.getElementById(`lastBtn${pos}`).disabled = currentPage === totalPages;
+      });
+      //      scrollToElmName("paginationTop")
+    }
+
+    async function loadData() {
+      loading.textContent = "読み込み中..."
+      loading.style.display = 'block';
+      const tbody = document.querySelector('#videoTable tbody');
+      tbody.innerHTML = '';
+      page = currentPage;
+
+      try {
+        const keywords = searchInput.value.trim();
+        const desc = searchInput2.value.trim();
+        const regex_checked = regex.checked ? 1 : 0;
+        const regex2_checked = regex2.checked ? 1 : 0;
+        let kind = normal.checked ? 1 : 0;
+        kind += live.checked ? 4 : 0;
+        kind += short.checked ? 2 : 0;
+        if (kind == 0) {
+          setInput(normal, true);
+          setInput(live, true);
+          setInput(short, true);
+          kind = 1 + 2 + 4;
+        }
+
+        const url = `https://boxpush.d4df816be9225fab.workers.dev/video`;
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ keywords: keywords, desc: desc, regex: regex_checked, regex2: regex2_checked, since: since.value, until: until.value, minTime: minTime.value, maxTime: maxTime.value, minView: minView.value, maxView: maxView.value, minLike: minLike.value, maxLike: maxLike.value, minComment: minComment.value, maxComment: maxComment.value, kind: kind, sort: sort.value, page: page })
+        });
+        if (!res.ok) throw new Error('取得に失敗しました');
+        const text = await res.json();
+        result = text.result;
+        totalCount = text.total_count;
+        videos = result.trim() ? result.split('\n').map(line => line.split('\t')) : [];
+        loading.style.display = 'none';
+        document.getElementById('videoTable').style.display = '';
+        document.getElementById('paginationTop').style.display = '';
+        document.getElementById('paginationBottom').style.display = '';
+        totalPages = Math.ceil(totalCount / PAGE_SIZE);
+        renderPage(page, totalCount);
+      } catch (e) {
+        loading.textContent = e;
+      }
+    }
+
+    function goPage(newPage) {
+      let pageNum = parseInt(newPage, 10);
+      // 入力値が数値でない場合は1に設定
+      if (isNaN(pageNum)) {
+        pageNum = 1;
+      }
+      // 1より小さい場合は1に補正
+      if (pageNum < 1) {
+        pageNum = 1;
+      }
+      // 総ページ数より大きい場合は総ページ数に補正
+      if (pageNum > totalPages) {
+        pageNum = totalPages;
+      }
+      jumpPage = pageNum;
+      applyFilter();
+    }
+
+    function applyFilter() {
+      currentPage = jumpPage;
+      jumpPage = 1;
+      loadData();
+    }
+
+    searchInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        searchBtn.click();
+      }
+    });
+    regex.addEventListener('change', function (e) {
+      if (this.checked) {
+        searchInput.placeholder = "正規表現でタイトル検索";
+      } else {
+        searchInput.placeholder = "スペース区切りでタイトルのAND検索";
+      }
+    });
+    regex2.addEventListener('change', function (e) {
+      if (this.checked) {
+        searchInput2.placeholder = "正規表現で説明検索";
+      } else {
+        searchInput2.placeholder = "スペース区切りで説明のAND検索";
+      }
+    });
+
+
+    const searchBtn = document.getElementById('searchBtn');
+    searchBtn.addEventListener('click', applyFilter);
+    const inputs = document.querySelectorAll(".searchField");
+    inputs.forEach(input => {
+      input.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault(); // フォーム送信を止める
+          searchBtn.click();         // ボタンのクリックを実行
+        }
+      });
+    });
+
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      searchInput.value = '';
+      searchInput2.value = '';
+      pageInfoTop.textContent = '-/-';
+      pageInfoBottom.textContent = '-/-';
+      pageInputTop.value = '1';
+      pageInputBottom.value = '1';
+      since.value = '';
+      until.value = '';
+      minTime.value = '';
+      maxTime.value = '';
+      minView.value = '';
+      maxView.value = '';
+      minLike.value = '';
+      maxLike.value = '';
+      minComment.value = '';
+      maxComment.value = '';
+      setInput(normal, true);
+      setInput(live, true);
+      setInput(short, true);
+      setInput(is_thumbnail, false)
+      setInput(sort, "0");
+      regex.checked = false;
+      regex2.checked = false;
+      currentPage = 1;
+      loadData();
+    });
+
+    ['Top', 'Bottom'].forEach(pos => {
+      document.getElementById(`prevBtn${pos}`).addEventListener('click', () => goPage(currentPage - 1));
+      document.getElementById(`nextBtn${pos}`).addEventListener('click', () => goPage(currentPage + 1));
+      document.getElementById(`firstBtn${pos}`).addEventListener('click', () => goPage(1));
+      document.getElementById(`lastBtn${pos}`).addEventListener('click', () => goPage(totalPages));
+
+      // ジャンプ機能のイベントリスナー
+      const jumpBtn = document.getElementById(`jumpBtn${pos}`);
+      const pageInput = document.getElementById(`pageInput${pos}`);
+
+      jumpBtn.addEventListener('click', () => {
+        goPage(pageInput.value);
+      });
+      pageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          goPage(pageInput.value);
+        }
+      });
+    });
+    window.addEventListener("load", () => {
+      loadInput(is_thumbnail);
+      loadInput(normal);
+      loadInput(live);
+      loadInput(short);
+      loadInput(sort);
+      // ページ読み込み時に初期ワードで検索
+      applyFilter();
+    });
+    normal.addEventListener("change", () => {
+      localStorage.setItem("normal", normal.checked);
+    });
+    live.addEventListener("change", () => {
+      localStorage.setItem("live", live.checked);
+    });
+    short.addEventListener("change", () => {
+      localStorage.setItem("short", short.checked);
+    });
+    is_thumbnail.addEventListener("change", () => {
+      localStorage.setItem("is_thumbnail", is_thumbnail.checked);
+    });
+    sort.addEventListener("change", () => {
+      localStorage.setItem("sort", sort.value);
+    });
+    img.addEventListener('click', () => {
+      const modal = document.createElement('div');
+      modal.style.position = "fixed";
+      modal.style.top = 0;
+      modal.style.left = 0;
+      modal.style.width = "100%";
+      modal.style.height = "100%";
+      modal.style.backgroundColor = "rgba(0,0,0,0.8)";
+      modal.style.display = "flex";
+      modal.style.alignItems = "center";
+      modal.style.justifyContent = "center";
+      modal.style.zIndex = 1000;
+      modal.style.padding = "5%";
+
+      const popupImg = document.createElement('img');
+      popupImg.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+      popupImg.style.maxWidth = "100%";
+      popupImg.style.maxHeight = "100%";
+      popupImg.style.objectFit = "contain";
+      popupImg.style.cursor = "pointer";
+
+      modal.appendChild(popupImg);
+      document.body.appendChild(modal);
+
+      const closeModal = () => {
+        window.removeEventListener('resize', adjustSize);
+        document.body.removeChild(modal);
+      };
+      modal.addEventListener('click', closeModal);
+
+      const adjustSize = () => {
+        const maxWidth = window.innerWidth * 0.9;
+        const maxHeight = window.innerHeight * 0.9;
+        popupImg.style.maxWidth = maxWidth + "px";
+        popupImg.style.maxHeight = maxHeight + "px";
+      };
+      adjustSize();
+      window.addEventListener('resize', adjustSize);
+    });
+
+  </script>
+</body>
+
+</html>
