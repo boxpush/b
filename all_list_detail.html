@@ -183,26 +183,26 @@
 
     #popupNav {
       position: absolute;
-      bottom: 10px;
-      width: 100%;
+      top: 50%;
+      left: 0;
+      right: 0;
       display: flex;
       justify-content: space-between;
-      padding: 0 10px;
-      box-sizing: border-box;
-      z-index: 1002;
+      transform: translateY(-50%);
+      pointer-events: none;
+      /* ボタン以外のクリックは iframe に通す */
+      z-index: 1001;
     }
 
-    #popupNav {
-      position: absolute;
-      bottom: 10px;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      padding: 0 10px;
-      box-sizing: border-box;
-      z-index: 1001;
-      /* iframeやcloseBtnより上に出す */
+    #popupNav button {
+      pointer-events: auto;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 24px;
+      cursor: pointer;
     }
 
     #popupBg {
@@ -484,7 +484,7 @@
         tr.appendChild(durationTd);
         //種別
         const kindTd = document.createElement('td');
-        kindTd.addEventListener('click', () => openPopup(kindTd,i));
+        kindTd.addEventListener('click', () => openPopupAtIndex(i));
         kindTd.setAttribute('data-vid', videoId);
         if ((kind & 2) > 0) {
           kindTd.textContent = "🍰";
@@ -786,7 +786,8 @@
 
 
     // ポップアップ表示関数
-    function openPopup(element,index) {
+    function openPopup(element, index) {
+      if (index < 0 || index >= videos.length) return;
       currentIndex = index;
       const videoId = element.getAttribute("data-vid");
       const kind = element.getAttribute("data-kind");
@@ -816,30 +817,32 @@
         closePopup();
       }
     });
-
-
     let currentIndex = 0;
-
     function openPopupAtIndex(index) {
-      if (index < 0 || index >= videos.length) return;
+      if (index < 0 || index >= videos.length) return; // 範囲外は無視
       currentIndex = index;
-      const videoId = videos[currentIndex][0]; // videoId
-      const kindFlag = videos[currentIndex][3]; // kind
-      const kind = (kindFlag & 2) ? "short" : "normal";
+      const [videoId, , , kindRaw] = videos[index];
+      const kind = ((kindRaw & 2) > 0) ? "short" : "normal";
       iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
       popup.dataset.kind = kind;
       popup.style.display = 'block';
       popupBg.style.display = 'block';
-      fitPopup();
-    }
 
-    document.getElementById('prevVideo').addEventListener('click', () => {
-      openPopupAtIndex(currentIndex - 1);
-    });
+      // 縦横判定
+      if (kind === "short") {
+        popup.classList.remove("landscape");
+        popup.classList.add("portrait");
+      } else {
+        popup.classList.remove("portrait");
+        popup.classList.add("landscape");
+      }
 
-    document.getElementById('nextVideo').addEventListener('click', () => {
-      openPopupAtIndex(currentIndex + 1);
-    });
+      document.getElementById('prevVideo').addEventListener('click', () => {
+        if (currentIndex > 0) openPopupAtIndex(currentIndex - 1);
+      });
+      document.getElementById('nextVideo').addEventListener('click', () => {
+        if (currentIndex < videos.length - 1) openPopupAtIndex(currentIndex + 1);
+      });
 
   </script>
 </body>
