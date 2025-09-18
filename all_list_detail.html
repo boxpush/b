@@ -198,8 +198,8 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 90vw;
+      height: 90vh;
       background: #000;
       z-index: 1000;
     }
@@ -305,6 +305,7 @@
   </table>
   <div id="popupBg"></div>
   <div id="popup">
+    <button id="closeBtn">×</button>
     <iframe id="ytIframe" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
@@ -727,7 +728,7 @@
       window.addEventListener('resize', adjustSize);
     }
 
-    
+
     // ポップアップ表示関数
     function openPopup(videoId) {
       iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
