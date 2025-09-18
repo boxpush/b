@@ -192,7 +192,20 @@
       z-index: 999;
     }
 
-    /* ポップアップ本体 */
+    #closeBtn {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      z-index: 1001;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+
     #popup {
       display: none;
       position: fixed;
@@ -205,25 +218,22 @@
       z-index: 1000;
     }
 
-    /* iframe */
+    #popup.landscape {
+      width: 90vw;
+      height: calc(90vw * 9 / 16);
+      max-height: 90vh;
+    }
+
+    #popup.portrait {
+      height: 90vh;
+      width: calc(90vh * 9 / 16);
+      max-width: 90vw;
+    }
+
     #popup iframe {
       width: 100%;
       height: 100%;
       border: 0;
-    }
-
-    #closeBtn {
-      position: absolute;
-      top: 0;
-      right: 0;
-      z-index: 1001;
-      background: rgba(0, 0, 0, 0.6);
-      color: #fff;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      padding: 5px 10px;
-      border-radius: 0;
     }
   </style>
 
@@ -746,6 +756,8 @@
       window.addEventListener('resize', adjustSize);
     }
 
+
+    // ポップアップ表示関数
     function openPopup(element) {
       const videoId = element.getAttribute("data-vid");
       const kind = element.getAttribute("data-kind");
@@ -759,31 +771,12 @@
         popup.classList.remove("portrait");
         popup.classList.add("landscape");
       }
-      fitPopup();
     }
     function closePopup() {
       iframe.src = "";
       popup.style.display = 'none';
       popupBg.style.display = 'none';
     }
-    function fitPopup() {
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      let width, height;
-
-      if (popup.dataset.orientation === "portrait") {
-        height = vh * 0.9;
-        width = Math.min(vw * 0.9, height * 9 / 16);
-      } else {
-        width = vw * 0.9;
-        height = Math.min(vh * 0.9, width * 9 / 16);
-      }
-
-      popup.style.width = width + "px";
-      popup.style.height = height + "px";
-    }
-
-    window.addEventListener("resize", fitPopup);
     popupBg.addEventListener('click', closePopup);
     closeBtn.addEventListener('click', closePopup);
     document.addEventListener('keydown', (e) => {
