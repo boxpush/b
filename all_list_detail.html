@@ -484,7 +484,7 @@
         tr.appendChild(durationTd);
         //種別
         const kindTd = document.createElement('td');
-        kindTd.addEventListener('click', () => openPopup(kindTd));
+        kindTd.addEventListener('click', () => openPopup(kindTd,i));
         kindTd.setAttribute('data-vid', videoId);
         if ((kind & 2) > 0) {
           kindTd.textContent = "🍰";
@@ -786,7 +786,8 @@
 
 
     // ポップアップ表示関数
-    function openPopup(element) {
+    function openPopup(element,index) {
+      currentIndex = index;
       const videoId = element.getAttribute("data-vid");
       const kind = element.getAttribute("data-kind");
       iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
