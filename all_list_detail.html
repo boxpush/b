@@ -734,6 +734,7 @@
     function openPopup(videoId) {
       iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
       popup.style.display = 'block';
+      popupBg.style.display = 'block';
     }
     popupBg.addEventListener('click', () => {
       iframe.src = "";
