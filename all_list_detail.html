@@ -305,7 +305,6 @@
   </table>
   <div id="popupBg"></div>
   <div id="popup">
-    <button id="closeBtn">×</button>
     <iframe id="ytIframe" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
@@ -735,11 +734,18 @@
       popup.style.display = 'block';
       popupBg.style.display = 'block';
     }
-    popupBg.addEventListener('click', () => {
+    function closePopup() {
       iframe.src = "";
       popup.style.display = 'none';
       popupBg.style.display = 'none';
+    }
+    popupBg.addEventListener('click', closePopup);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === "Escape") {
+        closePopup();
+      }
     });
+
   </script>
 </body>
 
