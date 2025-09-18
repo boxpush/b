@@ -183,24 +183,26 @@
 
     #popupNav {
       position: absolute;
-      bottom: 0;
+      bottom: 10px;
       width: 100%;
       display: flex;
       justify-content: space-between;
-      padding: 5px 10px;
+      padding: 0 10px;
       box-sizing: border-box;
       z-index: 1002;
-      /* closeBtnより上に出る */
     }
 
-    #popupNav button {
-      font-size: 20px;
-      background: rgba(0, 0, 0, 0.6);
-      color: #fff;
-      border: none;
-      padding: 5px 10px;
-      cursor: pointer;
-      border-radius: 4px;
+    #popupNav {
+      position: absolute;
+      bottom: 10px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 10px;
+      box-sizing: border-box;
+      z-index: 1001;
+      /* iframeやcloseBtnより上に出す */
     }
 
     #popupBg {
@@ -355,10 +357,10 @@
   <div id="popup">
     <button id="closeBtn">×</button>
     <iframe id="ytIframe" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-  </div>
-  <div id="popupNav">
-    <button id="prevVideo">←</button>
-    <button id="nextVideo">→</button>
+    <div id="popupNav">
+      <button id="prevVideo">←</button>
+      <button id="nextVideo">→</button>
+    </div>
   </div>
 
   <nav id="paginationBottom" style="display:none;">
@@ -788,6 +790,7 @@
       const videoId = element.getAttribute("data-vid");
       const kind = element.getAttribute("data-kind");
       iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      popup.dataset.kind = kind;
       popup.style.display = 'block';
       popupBg.style.display = 'block';
       if (kind === "short") {
@@ -797,11 +800,13 @@
         popup.classList.remove("portrait");
         popup.classList.add("landscape");
       }
+      document.getElementById('popupNav').style.display = 'flex';
     }
     function closePopup() {
       iframe.src = "";
       popup.style.display = 'none';
       popupBg.style.display = 'none';
+      document.getElementById('popupNav').style.display = 'none';
     }
     popupBg.addEventListener('click', closePopup);
     closeBtn.addEventListener('click', closePopup);
@@ -835,11 +840,6 @@
       openPopupAtIndex(currentIndex + 1);
     });
 
-    // kindTdクリックで開く場合
-    kindTd.addEventListener('click', () => {
-      const index = Array.from(tbody.children).indexOf(kindTd.parentElement);
-      openPopupAtIndex(index);
-    });
   </script>
 </body>
 
