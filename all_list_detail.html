@@ -232,14 +232,17 @@
 
     #popup {
       display: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: #000;
       border-radius: 10px;
       overflow: visible;
       z-index: 1000;
+      background: transparent;
     }
 
     #popup.landscape {
@@ -264,7 +267,8 @@
     }
 
     #popup iframe {
-      width: calc(100% - 120px); /* ← 余白分だけ縮める（動画自体は元の比率維持） */
+      width: calc(100% - 120px);
+      /* ← 余白分だけ縮める（動画自体は元の比率維持） */
       height: 100%;
       border: 0;
     }
