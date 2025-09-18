@@ -181,73 +181,19 @@
       gap: 5px;
     }
 
-    #popupBg {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      z-index: 999;
-      /* 背景 */
-    }
-
-    /* ポップアップ本体 */
-    #popup {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 90vw;
-      max-width: 1000px;
-      height: 90vh;
-      background: #000;
-      border-radius: 10px;
-      overflow: hidden;
-      z-index: 1000;
-      /* 背景より上 */
-    }
-
-    /* iframe を包むラッパー */
-    .iframe-wrapper {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      padding-left: 60px;
-      /* 左ボタン用 */
-      padding-right: 60px;
-      /* 右ボタン用 */
-      box-sizing: border-box;
-    }
-
-    /* YouTube iframe */
-    #ytIframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      display: block;
-    }
-
-    /* 左右ナビボタンのラッパー */
     #popupNav {
       position: absolute;
       top: 50%;
       left: 0;
       right: 0;
-      height: 0;
-      /* ボタンはabsoluteで配置 */
       display: flex;
       justify-content: space-between;
       transform: translateY(-50%);
       pointer-events: none;
-      /* wrapper 上で不要なイベントは透過 */
+      /* ボタン以外のクリックは iframe に通す */
       z-index: 1001;
-      /* iframe の上 */
     }
 
-    /* 左右ナビボタン */
     #popupNav button {
       pointer-events: auto;
       background: rgba(0, 0, 0, 0.6);
@@ -257,25 +203,44 @@
       border-radius: 4px;
       font-size: 24px;
       cursor: pointer;
-      user-select: none;
     }
 
-    /* 閉じるボタン */
+    #popupBg {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 999;
+    }
+
     #closeBtn {
       position: absolute;
-      top: 5px;
-      right: 5px;
-      z-index: 1002;
-      /* ナビより上 */
+      top: 0;
+      right: 0;
+      z-index: 1001;
       background: rgba(0, 0, 0, 0.6);
       color: #fff;
       border: none;
       font-size: 24px;
       cursor: pointer;
-      padding: 5px 10px;
-      border-radius: 5px;
+      padding: 8px 12px;
+      border-radius: 0;
     }
 
+    #popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #000;
+      border-radius: 10px;
+      overflow: hidden;
+      z-index: 1000;
+    }
 
     #popup.landscape {
       width: 90vw;
@@ -390,15 +355,14 @@
   </table>
   <div id="popupBg"></div>
   <div id="popup">
-    <div class="iframe-wrapper">
-      <iframe id="ytIframe" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-      <div id="popupNav">
-        <button id="prevBtn">←</button>
-        <button id="nextBtn">→</button>
-      </div>
-      <button id="closeBtn">×</button>
+    <button id="closeBtn">×</button>
+    <iframe id="ytIframe" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <div id="popupNav">
+      <button id="prevVideo">←</button>
+      <button id="nextVideo">→</button>
     </div>
   </div>
+
   <nav id="paginationBottom" style="display:none;">
     <button id="firstBtnBottom" disabled>最初へ</button>
     <button id="prevBtnBottom" disabled>前へ</button>
