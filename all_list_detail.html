@@ -189,18 +189,22 @@
       width: 100%;
       height: 100%;
       background: rgba(0, 0, 0, 0.8);
-      /* 半透明の背景 */
       z-index: 999;
     }
 
     #popup {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       width: 90vw;
+      /* 画面の90%幅 */
       height: 90vh;
+      /* 画面の90%高さ */
       background: #000;
+      border-radius: 10px;
+      overflow: hidden;
       z-index: 1000;
     }
 
@@ -208,6 +212,20 @@
       width: 100%;
       height: 100%;
       border: 0;
+    }
+
+    #closeBtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1001;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 5px;
     }
   </style>
 
@@ -349,9 +367,10 @@
     let currentPage = 1;
     let jumpPage = 1;
     let totalPages = 1;
+    const popupBg = document.getElementById('popupBg');
     const popup = document.getElementById('popup');
     const iframe = document.getElementById('ytIframe');
-    const popupBg = document.getElementById('popupBg');
+    const closeBtn = document.getElementById('closeBtn');
 
     toTimeStr = t => new Date(t * 1e3).toISOString().substr(t < 3600 ? 14 : 11, t < 3600 ? 5 : 8)
     function formatTime(ms) {
@@ -740,6 +759,7 @@
       popupBg.style.display = 'none';
     }
     popupBg.addEventListener('click', closePopup);
+    closeBtn.addEventListener('click', closePopup);
     document.addEventListener('keydown', (e) => {
       if (e.key === "Escape") {
         closePopup();
