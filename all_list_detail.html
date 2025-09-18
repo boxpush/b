@@ -338,7 +338,7 @@
     let currentPage = 1;
     let jumpPage = 1;
     let totalPages = 1;
-    let timer;
+    const table = document.getElementById('myTable');
     const popup = document.getElementById('popup');
     const iframe = document.getElementById('shortIframe');
 
@@ -419,7 +419,9 @@
         const kindTd = document.createElement('td');
         if ((kind & 2) > 0) {
           kindTd.textContent = "🍰";
-          kindTd.setAttribute("data-vid", videoId);
+//          kindTd.setAttribute("data-vid", videoId);
+          kindTd.addEventListener('click', () => openPopup(videoId));
+
         } else if ((kind & 8) > 0) {
           kindTd.textContent = "🔵";
         } else if ((kind & 16) > 0) {
@@ -714,31 +716,25 @@
       }
       window.addEventListener('resize', adjustSize);
     }
-    document.querySelectorAll('td[data-vid]').forEach(td => {
-      td.addEventListener('mousedown', () => {
-        timer = setTimeout(() => {
-          iframe.src = td.dataset.video + "?autoplay=1";
-          popup.style.display = 'block';
-        }, 500); // 長押し0.5秒
-      });
 
-      td.addEventListener('mouseup', () => clearTimeout(timer));
-      td.addEventListener('mouseleave', () => clearTimeout(timer));
+    // ポップアップ表示関数
+    function openPopup(videoId) {
+      iframe.src = `https://www.youtube.com/shorts/${videoId}` + "?autoplay=1";
+      popup.style.display = 'block';
+    }
 
-      // スマホ向け長押し
-      td.addEventListener('touchstart', () => {
-        timer = setTimeout(() => {
-          iframe.src = td.dataset.video + "?autoplay=1";
-          popup.style.display = 'block';
-        }, 500);
-      });
-      td.addEventListener('touchend', () => clearTimeout(timer));
-    });
-
+    // ポップアップ閉じる
     popup.addEventListener('click', () => {
       iframe.src = "";
       popup.style.display = 'none';
     });
+
+    // TDにクリックイベントを設定する関数
+    function attachTDClick(td, videoUrl) {
+      td.addEventListener('click', () => {
+        openPopup(videoUrl);
+      });
+    }
   </script>
 </body>
 
