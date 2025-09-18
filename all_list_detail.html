@@ -195,6 +195,18 @@
       z-index: 1000;
     }
 
+    #popupBg {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      /* 半透明の背景 */
+      z-index: 999;
+    }
+
     #popup iframe {
       width: 100%;
       height: 100%;
@@ -338,9 +350,9 @@
     let currentPage = 1;
     let jumpPage = 1;
     let totalPages = 1;
-    const table = document.getElementById('myTable');
     const popup = document.getElementById('popup');
     const iframe = document.getElementById('shortIframe');
+    const popupBg = document.getElementById('popupBg');
 
     toTimeStr = t => new Date(t * 1e3).toISOString().substr(t < 3600 ? 14 : 11, t < 3600 ? 5 : 8)
     function formatTime(ms) {
@@ -419,7 +431,7 @@
         const kindTd = document.createElement('td');
         if ((kind & 2) > 0) {
           kindTd.textContent = "🍰";
-//          kindTd.setAttribute("data-vid", videoId);
+          //          kindTd.setAttribute("data-vid", videoId);
           kindTd.addEventListener('click', () => openPopup(videoId));
 
         } else if ((kind & 8) > 0) {
@@ -719,22 +731,14 @@
 
     // ポップアップ表示関数
     function openPopup(videoId) {
-      iframe.src = `https://www.youtube.com/embed/${videoId}` + "?autoplay=1";
+      iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
       popup.style.display = 'block';
     }
-
-    // ポップアップ閉じる
-    popup.addEventListener('click', () => {
+    popupBg.addEventListener('click', () => {
       iframe.src = "";
       popup.style.display = 'none';
+      popupBg.style.display = 'none';
     });
-
-    // TDにクリックイベントを設定する関数
-    function attachTDClick(td, videoUrl) {
-      td.addEventListener('click', () => {
-        openPopup(videoUrl);
-      });
-    }
   </script>
 </body>
 
