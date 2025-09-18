@@ -181,6 +181,28 @@
       gap: 5px;
     }
 
+    #popupNav {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 10px;
+      box-sizing: border-box;
+      z-index: 1002;
+      /* closeBtnより上に出る */
+    }
+
+    #popupNav button {
+      font-size: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
     #popupBg {
       display: none;
       position: fixed;
@@ -333,6 +355,10 @@
   <div id="popup">
     <button id="closeBtn">×</button>
     <iframe id="ytIframe" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
+  <div id="popupNav">
+    <button id="prevVideo">←</button>
+    <button id="nextVideo">→</button>
   </div>
 
   <nav id="paginationBottom" style="display:none;">
@@ -785,6 +811,35 @@
       }
     });
 
+
+    let currentIndex = 0;
+
+    function openPopupAtIndex(index) {
+      if (index < 0 || index >= videos.length) return;
+      currentIndex = index;
+      const videoId = videos[currentIndex][0]; // videoId
+      const kindFlag = videos[currentIndex][3]; // kind
+      const kind = (kindFlag & 2) ? "short" : "normal";
+      iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      popup.dataset.kind = kind;
+      popup.style.display = 'block';
+      popupBg.style.display = 'block';
+      fitPopup();
+    }
+
+    document.getElementById('prevVideo').addEventListener('click', () => {
+      openPopupAtIndex(currentIndex - 1);
+    });
+
+    document.getElementById('nextVideo').addEventListener('click', () => {
+      openPopupAtIndex(currentIndex + 1);
+    });
+
+    // kindTdクリックで開く場合
+    kindTd.addEventListener('click', () => {
+      const index = Array.from(tbody.children).indexOf(kindTd.parentElement);
+      openPopupAtIndex(index);
+    });
   </script>
 </body>
 
