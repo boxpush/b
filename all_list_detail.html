@@ -190,7 +190,6 @@
       justify-content: space-between;
       transform: translateY(-50%);
       pointer-events: none;
-      /* ボタン以外のクリックは iframe に通す */
       z-index: 1001;
     }
 
@@ -484,7 +483,7 @@
         tr.appendChild(durationTd);
         //種別
         const kindTd = document.createElement('td');
-        kindTd.addEventListener('click', () => openPopup(kindTd, i));
+        kindTd.addEventListener('click', () => openPopupAtIndex(i));
         kindTd.setAttribute('data-vid', videoId);
         if ((kind & 2) > 0) {
           kindTd.textContent = "🍰";
@@ -844,13 +843,11 @@
       document.getElementById('popupNav').style.display = 'flex';
     }
     document.getElementById('prevVideo').addEventListener('click', () => {
-      openPopupAtIndex(currentIndex - 1);
+      if (currentIndex > 0) openPopupAtIndex(currentIndex - 1);
     });
-
     document.getElementById('nextVideo').addEventListener('click', () => {
-      openPopupAtIndex(currentIndex + 1);
+      if (currentIndex < videos.length - 1) openPopupAtIndex(currentIndex + 1);
     });
-
   </script>
 </body>
 
