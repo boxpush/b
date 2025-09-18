@@ -183,18 +183,26 @@
 
     #popupNav {
       position: absolute;
-      top: 50%;
+      /* fixed → absolute に変更 */
+      top: 0;
+      /* ポップアップ内で上下いっぱい */
+      bottom: 0;
       left: 0;
       right: 0;
       display: flex;
       justify-content: space-between;
-      transform: translateY(-50%);
+      /* 左右に配置 */
+      align-items: center;
+      /* 垂直中央に配置 */
       pointer-events: none;
+      /* iframe 操作を妨げない */
       z-index: 1001;
+      /* iframeより上に表示 */
     }
 
     #popupNav button {
       pointer-events: auto;
+      /* ボタンだけクリック可能 */
       background: rgba(0, 0, 0, 0.6);
       color: #fff;
       border: none;
@@ -202,6 +210,7 @@
       border-radius: 4px;
       font-size: 24px;
       cursor: pointer;
+      user-select: none;
     }
 
     #popupBg {
