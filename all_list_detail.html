@@ -194,8 +194,8 @@
 
     #closeBtn {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      top: 2px;
+      right: 2px;
       z-index: 1001;
       background: rgba(0, 0, 0, 0.6);
       color: #fff;
@@ -218,19 +218,15 @@
       z-index: 1000;
     }
 
-    /* 横長（通常動画用） */
     #popup.landscape {
       width: 90vw;
       height: calc(90vw * 9 / 16);
-      /* 16:9比率維持 */
       max-height: 90vh;
     }
 
-    /* 縦長（ショート用） */
     #popup.portrait {
       height: 90vh;
       width: calc(90vh * 9 / 16);
-      /* 9:16比率維持 */
       max-width: 90vw;
     }
 
@@ -460,13 +456,11 @@
         tr.appendChild(durationTd);
         //種別
         const kindTd = document.createElement('td');
-        kindTd.addEventListener('click', () => openPopup(videoId));
-        popup.classList.remove("portrait");
-        popup.classList.add("landscape");
+        kindTd.addEventListener('click', () => openPopup(kindTd));
+        kindTd.setAttribute('data-vid', videoId);
         if ((kind & 2) > 0) {
           kindTd.textContent = "🍰";
-          popup.classList.remove("landscape");
-          popup.classList.add("portrait");
+          kindTd.setAttribute('data-kind', "short");
         } else if ((kind & 8) > 0) {
           kindTd.textContent = "🔵";
         } else if ((kind & 16) > 0) {
@@ -475,7 +469,6 @@
           kindTd.textContent = "⚪";
         } else {
           kindTd.textContent = "";
-          kindTd.removeEventListener('click', () => openPopup(videoId));
         }
         tr.appendChild(kindTd);
         //開始時刻
@@ -765,10 +758,19 @@
 
 
     // ポップアップ表示関数
-    function openPopup(videoId) {
+    function openPopup(element) {
+      const videoId = element.getAttribute("data-vid");
+      const kind = element.getAttribute("data-kind");
       iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
       popup.style.display = 'block';
       popupBg.style.display = 'block';
+      if (kind === "short") {
+        popup.classList.remove("landscape");
+        popup.classList.add("portrait");
+      } else {
+        popup.classList.remove("portrait");
+        popup.classList.add("landscape");
+      }
     }
     function closePopup() {
       iframe.src = "";
