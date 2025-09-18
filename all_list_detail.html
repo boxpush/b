@@ -238,20 +238,29 @@
       transform: translate(-50%, -50%);
       background: #000;
       border-radius: 10px;
-      overflow: hidden;
+      overflow: visible;
       z-index: 1000;
     }
 
     #popup.landscape {
-      width: 90vw;
+      width: calc(90vw + 120px);
+      /* ← 左右に余白を足す */
       height: calc(90vw * 9 / 16);
       max-height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
+    /* 縦動画（同じく左右余白を追加） */
     #popup.portrait {
       height: 90vh;
-      width: calc(90vh * 9 / 16);
+      width: calc(90vh * 9 / 16 + 120px);
+      /* ← 左右に余白を足す */
       max-width: 90vw;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     #popup iframe {
