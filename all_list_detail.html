@@ -430,11 +430,9 @@
         tr.appendChild(durationTd);
         //種別
         const kindTd = document.createElement('td');
+        kindTd.addEventListener('click', () => openPopup(videoId));
         if ((kind & 2) > 0) {
           kindTd.textContent = "🍰";
-          //          kindTd.setAttribute("data-vid", videoId);
-          kindTd.addEventListener('click', () => openPopup(videoId));
-
         } else if ((kind & 8) > 0) {
           kindTd.textContent = "🔵";
         } else if ((kind & 16) > 0) {
@@ -443,6 +441,7 @@
           kindTd.textContent = "⚪";
         } else {
           kindTd.textContent = "";
+          kindTd.removeEventListener('click', () => openPopup(videoId));
         }
         tr.appendChild(kindTd);
         //開始時刻
