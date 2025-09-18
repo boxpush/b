@@ -484,7 +484,7 @@
         tr.appendChild(durationTd);
         //種別
         const kindTd = document.createElement('td');
-        kindTd.addEventListener('click', () => openPopupAtIndex(i));
+        kindTd.addEventListener('click', () => openPopup(kindTd, i));
         kindTd.setAttribute('data-vid', videoId);
         if ((kind & 2) > 0) {
           kindTd.textContent = "🍰";
@@ -817,12 +817,16 @@
         closePopup();
       }
     });
+
+
     let currentIndex = 0;
     function openPopupAtIndex(index) {
       if (index < 0 || index >= videos.length) return; // 範囲外は無視
       currentIndex = index;
+
       const [videoId, , , kindRaw] = videos[index];
       const kind = ((kindRaw & 2) > 0) ? "short" : "normal";
+
       iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
       popup.dataset.kind = kind;
       popup.style.display = 'block';
@@ -837,13 +841,15 @@
         popup.classList.add("landscape");
       }
 
-      document.getElementById('prevVideo').addEventListener('click', () => {
-        if (currentIndex > 0) openPopupAtIndex(currentIndex - 1);
-      });
-      document.getElementById('nextVideo').addEventListener('click', () => {
-        if (currentIndex < videos.length - 1) openPopupAtIndex(currentIndex + 1);
-      });
+      document.getElementById('popupNav').style.display = 'flex';
     }
+    document.getElementById('prevVideo').addEventListener('click', () => {
+      openPopupAtIndex(currentIndex - 1);
+    });
+
+    document.getElementById('nextVideo').addEventListener('click', () => {
+      openPopupAtIndex(currentIndex + 1);
+    });
 
   </script>
 </body>
