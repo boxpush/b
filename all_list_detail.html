@@ -190,7 +190,6 @@
       justify-content: space-between;
       transform: translateY(-50%);
       pointer-events: none;
-      /* ボタン以外のクリックは iframe に通す */
       z-index: 1001;
     }
 
@@ -246,7 +245,6 @@
 
     #popup.landscape {
       width: calc(90vw + 120px);
-      /* ← 左右に余白を足す */
       height: calc(90vw * 9 / 16);
       max-height: 90vh;
       display: flex;
@@ -254,11 +252,9 @@
       justify-content: center;
     }
 
-    /* 縦動画（同じく左右余白を追加） */
     #popup.portrait {
       height: 90vh;
       width: calc(90vh * 9 / 16 + 120px);
-      /* ← 左右に余白を足す */
       max-width: 90vw;
       display: flex;
       align-items: center;
@@ -268,7 +264,6 @@
     #popup iframe {
       display: inline-block;
       width: calc(100% - 120px);
-      /* ← 余白分だけ縮める（動画自体は元の比率維持） */
       height: 100%;
       border: 0;
     }
@@ -417,10 +412,14 @@
     let currentPage = 1;
     let jumpPage = 1;
     let totalPages = 1;
+    let currentIndex = 0;
     const popupBg = document.getElementById('popupBg');
     const popup = document.getElementById('popup');
     const iframe = document.getElementById('ytIframe');
     const closeBtn = document.getElementById('closeBtn');
+    const prevVideo = document.getElementById("prevVideo");
+    const nextVideo = document.getElementById("nextVideo");
+
 
     toTimeStr = t => new Date(t * 1e3).toISOString().substr(t < 3600 ? 14 : 11, t < 3600 ? 5 : 8)
     function formatTime(ms) {
@@ -830,13 +829,15 @@
         closePopup();
       }
     });
-
-
-    let currentIndex = 0;
+    prevVideo.addEventListener('click', () => {
+      if (currentIndex > 0) openPopupAtIndex(currentIndex - 1);
+    });
+    nextVideo.addEventListener('click', () => {
+      if (currentIndex < videos.length - 1) openPopupAtIndex(currentIndex + 1);
+    });
     function openPopupAtIndex(index) {
       if (index < 0 || index >= videos.length) return;
       currentIndex = index;
-
       const [videoId, , , kindRaw] = videos[index];
       const kind = ((kindRaw & 2) > 0) ? "short" : "normal";
 
@@ -853,17 +854,8 @@
         popup.classList.remove("portrait");
         popup.classList.add("landscape");
       }
-      const prevVideo = document.getElementById("prevVideo");
-      const nextVideo = document.getElementById("nextVideo");
       prevVideo.style.visibility = (index > 0) ? "visible" : "hidden";
       nextVideo.style.visibility = (index < videos.length - 1) ? "visible" : "hidden";
-      prevVideo.addEventListener('click', () => {
-        if (currentIndex > 0) openPopupAtIndex(currentIndex - 1);
-      });
-      nextVideo.addEventListener('click', () => {
-        if (currentIndex < videos.length - 1) openPopupAtIndex(currentIndex + 1);
-      });
-
       document.getElementById('popupNav').style.display = 'flex';
     }
   </script>
