@@ -834,9 +834,7 @@
 
     let currentIndex = 0;
     function openPopupAtIndex(index) {
-      const prevBtn = document.getElementById("prevVideo");
-      const nextBtn = document.getElementById("nextVideo");
-      if (index < 0 || index >= videos.length) return; 
+      if (index < 0 || index >= videos.length) return;
       currentIndex = index;
 
       const [videoId, , , kindRaw] = videos[index];
@@ -855,18 +853,19 @@
         popup.classList.remove("portrait");
         popup.classList.add("landscape");
       }
-
-      prevBtn.style.display = (index > 0) ? "block" : "none";
-      nextBtn.style.display = (index < videos.length - 1) ? "block" : "none";
+      const prevVideo = document.getElementById("prevVideo");
+      const nextVideo = document.getElementById("nextVideo");
+      prevVideo.style.display = (index > 0) ? "block" : "none";
+      nextVideo.style.display = (index < videos.length - 1) ? "block" : "none";
+      prevVideo.addEventListener('click', () => {
+        if (currentIndex > 0) openPopupAtIndex(currentIndex - 1);
+      });
+      nextVideo.addEventListener('click', () => {
+        if (currentIndex < videos.length - 1) openPopupAtIndex(currentIndex + 1);
+      });
 
       document.getElementById('popupNav').style.display = 'flex';
     }
-    prevBtn.addEventListener('click', () => {
-      if (currentIndex > 0) openPopupAtIndex(currentIndex - 1);
-    });
-    nextBtn.addEventListener('click', () => {
-      if (currentIndex < videos.length - 1) openPopupAtIndex(currentIndex + 1);
-    });
   </script>
 </body>
 
