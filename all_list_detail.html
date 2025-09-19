@@ -532,6 +532,7 @@
           img.style.maxHeight = "100%";
           img.style.objectFit = "contain";
           img.setAttribute('data-vid', videoId);
+          img.setAttribute('cursor', 'pointer');
           img.addEventListener('click', () => showPopup(img));
           imgTd.appendChild(img);
         } else {
