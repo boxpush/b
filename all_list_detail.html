@@ -498,7 +498,7 @@
         const kindTd = document.createElement('td');
         kindTd.addEventListener('click', () => openPopupAtIndex(i));
         kindTd.setAttribute('data-vid', videoId);
-        kindTd.setAttribute('cursor', 'pointer');
+        kindTd.style.cursor = 'pointer';
         if ((kind & 2) > 0) {
           kindTd.textContent = "🍰";
           kindTd.setAttribute('data-kind', "short");
@@ -532,7 +532,7 @@
           img.style.maxHeight = "100%";
           img.style.objectFit = "contain";
           img.setAttribute('data-vid', videoId);
-          img.setAttribute('cursor', 'pointer');
+          img.style.cursor = 'pointer';
           img.addEventListener('click', () => showPopup(img));
           imgTd.appendChild(img);
         } else {
@@ -824,6 +824,7 @@
       const kind = ((kindRaw & 2) > 0) ? "short" : "normal";
 
       iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      iframe.setAttribute('modestbranding', '1');
       popup.dataset.kind = kind;
       popup.style.display = 'block';
       popupBg.style.display = 'block';
