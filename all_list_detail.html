@@ -855,8 +855,8 @@
       }
       const prevVideo = document.getElementById("prevVideo");
       const nextVideo = document.getElementById("nextVideo");
-      prevVideo.style.display = (index > 0) ? "block" : "none";
-      nextVideo.style.display = (index < videos.length - 1) ? "block" : "none";
+      prevVideo.style.visibility = (index > 0) ? "visible" : "hidden";
+      nextVideo.style.visibility = (index < videos.length - 1) ? "visible" : "hidden";
       prevVideo.addEventListener('click', () => {
         if (currentIndex > 0) openPopupAtIndex(currentIndex - 1);
       });
