@@ -231,12 +231,14 @@
     }
 
     #popup {
+
       display: none;
+      text-align: center;
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: #000;
+      background: transparent;
       border-radius: 10px;
       overflow: visible;
       z-index: 1000;
@@ -264,7 +266,9 @@
     }
 
     #popup iframe {
-      width: calc(100% - 120px); /* ← 余白分だけ縮める（動画自体は元の比率維持） */
+      display: inline-block;
+      width: calc(100% - 120px);
+      /* ← 余白分だけ縮める（動画自体は元の比率維持） */
       height: 100%;
       border: 0;
     }
