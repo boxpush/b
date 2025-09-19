@@ -509,7 +509,7 @@
         } else if ((kind & 32) > 0) {
           kindTd.textContent = "⚪";
         } else {
-          kindTd.textContent = "";
+          kindTd.textContent = "🎞️";
         }
         tr.appendChild(kindTd);
         //開始時刻
@@ -834,7 +834,9 @@
 
     let currentIndex = 0;
     function openPopupAtIndex(index) {
-      if (index < 0 || index >= videos.length) return; // 範囲外は無視
+      const prevBtn = document.getElementById("prevVideo");
+      const nextBtn = document.getElementById("nextVideo");
+      if (index < 0 || index >= videos.length) return; 
       currentIndex = index;
 
       const [videoId, , , kindRaw] = videos[index];
@@ -853,18 +855,16 @@
         popup.classList.remove("portrait");
         popup.classList.add("landscape");
       }
-      const prevBtn = document.getElementById("prevBtn");
-      const nextBtn = document.getElementById("nextBtn");
 
       prevBtn.style.display = (index > 0) ? "block" : "none";
       nextBtn.style.display = (index < videos.length - 1) ? "block" : "none";
 
       document.getElementById('popupNav').style.display = 'flex';
     }
-    document.getElementById('prevVideo').addEventListener('click', () => {
+    prevBtn.addEventListener('click', () => {
       if (currentIndex > 0) openPopupAtIndex(currentIndex - 1);
     });
-    document.getElementById('nextVideo').addEventListener('click', () => {
+    nextBtn.addEventListener('click', () => {
       if (currentIndex < videos.length - 1) openPopupAtIndex(currentIndex + 1);
     });
   </script>
