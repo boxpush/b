@@ -498,6 +498,7 @@
         const kindTd = document.createElement('td');
         kindTd.addEventListener('click', () => openPopupAtIndex(i));
         kindTd.setAttribute('data-vid', videoId);
+        kindTd.setAttribute('cursor', 'pointer');
         if ((kind & 2) > 0) {
           kindTd.textContent = "🍰";
           kindTd.setAttribute('data-kind', "short");
@@ -796,26 +797,6 @@
       window.addEventListener('resize', adjustSize);
     }
 
-
-    // ポップアップ表示関数
-    function openPopup(element, index) {
-      if (index < 0 || index >= videos.length) return;
-      currentIndex = index;
-      const videoId = element.getAttribute("data-vid");
-      const kind = element.getAttribute("data-kind");
-      iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-      popup.dataset.kind = kind;
-      popup.style.display = 'block';
-      popupBg.style.display = 'block';
-      if (kind === "short") {
-        popup.classList.remove("landscape");
-        popup.classList.add("portrait");
-      } else {
-        popup.classList.remove("portrait");
-        popup.classList.add("landscape");
-      }
-      document.getElementById('popupNav').style.display = 'flex';
-    }
     function closePopup() {
       iframe.src = "";
       popup.style.display = 'none';
