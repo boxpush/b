@@ -853,6 +853,11 @@
         popup.classList.remove("portrait");
         popup.classList.add("landscape");
       }
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+
+      prevBtn.style.display = (index > 0) ? "block" : "none";
+      nextBtn.style.display = (index < videos.length - 1) ? "block" : "none";
 
       document.getElementById('popupNav').style.display = 'flex';
     }
