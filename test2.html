@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube 自動再生</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        /* YouTubeプレイヤーのコンテナ */
+        .video-container {
+            width: 854px; /* 16:9比率の幅 */
+            height: 480px; /* 16:9比率の高さ */
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+      <iframe id="player"
+              width="854"
+              height="480"
+              src="https://www.youtube.com/embed/mJb_Whgz_QE?enablejsapi=1&playsinline=1&autoplay=1&controls=1"
+              frameborder="0"
+              allow="autoplay; encrypted-media"
+              allowfullscreen></iframe>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        const videoList = [
+            'mJb_Whgz_QE', // 1本目の動画ID
+            'N6PrCPryxcM', // 2本目の動画ID
+            'I4xwKjJX2Ko'  // 3本目の動画ID
+        ];
+        let currentVideoIndex = 0;
+        let player;
+
+        // YouTube IFrame APIの読み込み完了時に実行される関数
+        function onYouTubeIframeAPIReady() {
+            // iframe要素を直接取得
+            const playerElement = document.getElementById('player');
+            player = new YT.Player(playerElement, {
+                videoId: videoList[currentVideoIndex],
+                playerVars: {
+                    'playsinline': 1,
+                    'autoplay': 1,
+                    'controls': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+          console.log("onYouTubeIframeAPIReady")
+        }
+        
+        function onPlayerReady(event) {
+          console.log("onPlayerReady")
+            event.target.playVideo();
+        }
+        
+        // プレイヤーの状態が変わったときに実行される関数
+        function onPlayerStateChange(event) {
+            // 動画が終了したかチェック
+            if (event.data === YT.PlayerState.ENDED) {
+                console.log('動画が終了しました。次の動画を再生します。');
+                
+                // 次の動画IDを取得（リストをループ）
+                currentVideoIndex = (currentVideoIndex + 1) % videoList.length;
+                
+                // 次の動画を読み込み、再生を開始
+                player.loadVideoById(videoList[currentVideoIndex]);
+            }
+        }
+    </script>
+</body>
+</html>
