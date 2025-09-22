@@ -190,7 +190,6 @@
       right: 0;
       display: flex;
       justify-content: space-between;
-      /* 左右に配置 */
       transform: translateY(-50%);
       pointer-events: none;
       z-index: 1001;
@@ -238,6 +237,12 @@
       border-radius: 0;
     }
     @media (orientation: portrait) {
+      .navColumn:first-child {
+        transform: translateX(-10px); 
+      }
+      .navColumn:last-child {
+        transform: translateX(10px); 
+      }      
       #prevVideo,
       #nextVideo {
         font-size: 28px;
