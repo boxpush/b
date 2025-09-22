@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" href="./favicon.ico" type="image/x-icon">
+  <!-- YouTube IFrame API | © Google | https://www.youtube.com/t/terms -->
   <script src="https://www.youtube.com/iframe_api"></script>
   <!-- DOMPurify 2.4.2
      (c) 2015-2025 Cure53
@@ -189,20 +190,55 @@
       right: 0;
       display: flex;
       justify-content: space-between;
+      /* 左右に配置 */
       transform: translateY(-50%);
       pointer-events: none;
       z-index: 1001;
     }
 
-    #popupNav button {
+    .navColumn {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
       pointer-events: auto;
+    }
+
+    #prevAuto,
+    #nextAuto {
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      border: none;
+      padding: 8px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    #prevVideo,
+    #nextVideo {
       background: rgba(0, 0, 0, 0.6);
       color: #fff;
       border: none;
       padding: 8px 12px;
       border-radius: 4px;
-      font-size: 24px;
+      font-size: 20px;
       cursor: pointer;
+    }
+
+    @media (orientation: portrait) {
+
+      #prevVideo,
+      #nextVideo {
+        font-size: 28px;
+        padding: 12px 16px;
+      }
+
+      #prevAuto,
+      #nextAuto {
+        font-size: 16px;
+        padding: 10px 12px;
+      }
     }
 
     #popupBg {
@@ -269,12 +305,88 @@
       border: 0;
       pointer-events: auto;
     }
+
+    .info-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .info-icon {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 25px;
+      height: 25px;
+      background-color: #007bff;
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      border-radius: 50%;
+      cursor: pointer;
+      user-select: none;
+      margin-left: 10px;
+      transform: translateY(-4px)
+    }
+
+    .speech-bubble {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: max-content;
+      background-color: #333;
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      z-index: 10;
+      text-align: left;
+    }
+
+
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: 100%;
+      transform: translateX(-50%);
+      border: 10px solid transparent;
+      border-bottom-color: #333;
+    }
+
+    .speech-bubble.active {
+      opacity: 1;
+      visibility: visible;
+    }
   </style>
 
 </head>
 
 <body>
-  <h2>動画詳細検索</h2>
+  <h2>動画詳細検索
+    <span class="info-container" id="infoIcon">
+      <span class="info-icon">?</span>
+      <div class="speech-bubble" id="speechBubble">
+        <div>・「種」の絵文字クリックでポップアップ再生</div>
+        <div>　　←→で前後の動画を再生</div>
+        <div>　　AUTOで前後の動画を自動再生</div>
+        <div>　　「ループ再生」なしで検索したとき</div>
+        <div>　　　→ページ内をループ再生</div>
+        <div>　　「ループ再生」ありで検索したとき</div>
+        <div>　　　→全ページをループ再生</div>
+        <div>・通常検索</div>
+        <div>　AND OR NOT ()が使用可能</div>
+        <div>　厳密に検索するなら単語を""で括る</div>
+        <div>・Regex検索(高度な正規表現は使えません)</div>
+        <div>　ex.　\w \d *? +? (?=...) (?!...)など</div>
+
+      </div>
+    </span>
+
+
+  </h2>
   <div id="searchForm">
     <div>
       <div class="search-item-group">
@@ -318,6 +430,13 @@
     <label><input type="checkbox" id="live">ライブ</label>
     <label><input type="checkbox" id="short">ショート</label>
     <label><input type="checkbox" id="is_thumbnail">サムネ表示</label>
+    <span>　ループ再生</span>
+    <select id="autoPlay" style="width:80px">
+      <option value="0" selected="selected">なし</option>
+      <option value="1">古い方へ</option>
+      <option value="2">新しい方へ</option>
+      <option value="3">同じ動画</option>
+    </select>
     <div class="container">
       <div class="left-column">
         <div class="row">
@@ -366,10 +485,16 @@
   <div id="popupBg"></div>
   <div id="popup">
     <button id="closeBtn">×</button>
-    <iframe id="ytIframe" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <div id="player"></div>
     <div id="popupNav">
-      <button id="prevVideo">←</button>
-      <button id="nextVideo">→</button>
+      <div class="navColumn">
+        <button id="prevAuto">AUTO</button>
+        <button id="prevVideo">←</button>
+      </div>
+      <div class="navColumn">
+        <button id="nextAuto">AUTO</button>
+        <button id="nextVideo">→</button>
+      </div>
     </div>
   </div>
 
@@ -400,6 +525,7 @@
     const minComment = document.getElementById('minComment');
     const maxComment = document.getElementById('maxComment');
     const sort = document.getElementById('sort');
+    const autoPlay = document.getElementById('autoPlay');
     const normal = document.getElementById('normal');
     const live = document.getElementById('live');
     const short = document.getElementById('short');
@@ -417,10 +543,12 @@
     let currentIndex = 0;
     const popupBg = document.getElementById('popupBg');
     const popup = document.getElementById('popup');
-    const iframe = document.getElementById('ytIframe');
+    //    const iframe = document.getElementById('ytIframe');
     const closeBtn = document.getElementById('closeBtn');
     const prevVideo = document.getElementById("prevVideo");
     const nextVideo = document.getElementById("nextVideo");
+    const prevAuto = document.getElementById("prevAuto");
+    const nextAuto = document.getElementById("nextAuto");
 
 
     toTimeStr = t => new Date(t * 1e3).toISOString().substr(t < 3600 ? 14 : 11, t < 3600 ? 5 : 8)
@@ -563,6 +691,30 @@
       });
       //      scrollToElmName("paginationTop")
     }
+    const fetchBoth = async (url, method) => {
+      const normalizedMethod = method.toUpperCase();
+      if (normalizedMethod === 'GET') {
+        const res = await fetch(url.toString(), {
+          method: 'GET'
+        });
+        return res;
+      } else if (normalizedMethod === 'POST') {
+        const data = {};
+        url.searchParams.forEach((value, key) => {
+          data[key] = value;
+        });
+        const res = await fetch(url.origin + url.pathname, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+        return res;
+      } else {
+        throw new Error('Unsupported method. Use "GET" or "POST".');
+      }
+    };
 
     async function loadData() {
       loading.textContent = "読み込み中..."
@@ -586,17 +738,38 @@
           kind = 1 + 2 + 4;
         }
 
-        const url = `https://boxpush.d4df816be9225fab.workers.dev/video`;
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ keywords: keywords, desc: desc, regex: regex_checked, regex2: regex2_checked, since: since.value, until: until.value, minTime: minTime.value, maxTime: maxTime.value, minView: minView.value, maxView: maxView.value, minLike: minLike.value, maxLike: maxLike.value, minComment: minComment.value, maxComment: maxComment.value, kind: kind, sort: sort.value, page: page })
-        });
+        const url = new URL("https://boxpush.d4df816be9225fab.workers.dev/video");
+        url.searchParams.append('keywords', keywords);
+        url.searchParams.append('desc', desc);
+        url.searchParams.append('regex', regex_checked);
+        url.searchParams.append('regex2', regex2_checked);
+        url.searchParams.append('since', since.value);
+        url.searchParams.append('until', until.value);
+        url.searchParams.append('minTime', minTime.value);
+        url.searchParams.append('maxTime', maxTime.value);
+        url.searchParams.append('minView', minView.value);
+        url.searchParams.append('maxView', maxView.value);
+        url.searchParams.append('minLike', minLike.value);
+        url.searchParams.append('maxLike', maxLike.value);
+        url.searchParams.append('minComment', minComment.value);
+        url.searchParams.append('maxComment', maxComment.value);
+        url.searchParams.append('kind', kind);
+        url.searchParams.append('sort', sort.value);
+        url.searchParams.append('autoPlay', autoPlay.value);
+        url.searchParams.append('page', page);
+        const res = await fetchBoth(url, "POST");
         if (!res.ok) throw new Error('取得に失敗しました');
         const text = await res.json();
         result = text.result;
         totalCount = text.total_count;
         videos = result.trim() ? result.split('\n').map(line => line.split('\t')) : [];
+        if (text.vids != "") {
+          vidList = text.vids.map(([vid, kind]) => ({ vid, kind }));
+        } else {
+          vidList = videos.map(([vid, kind]) => ({ vid, kind }));
+        }
+        console.log("vidList", vidList);
+        console.log("len", vidList.length);
         loading.style.display = 'none';
         document.getElementById('videoTable').style.display = '';
         document.getElementById('paginationTop').style.display = '';
@@ -689,6 +862,7 @@
       setInput(short, true);
       setInput(is_thumbnail, false)
       setInput(sort, "0");
+      setInput(autoPlay, "0")
       regex.checked = false;
       regex2.checked = false;
       currentPage = 1;
@@ -720,6 +894,7 @@
       loadInput(live);
       loadInput(short);
       loadInput(sort);
+      loadInput(autoPlay);
       // ページ読み込み時に初期ワードで検索
       applyFilter();
     });
@@ -737,6 +912,9 @@
     });
     sort.addEventListener("change", () => {
       localStorage.setItem("sort", sort.value);
+    });
+    autoPlay.addEventListener("change", () => {
+      localStorage.setItem("autoPlay", autoPlay.value);
     });
     function showPopupImg(imgElement) {
       const videoId = imgElement.getAttribute("data-vid");
@@ -799,18 +977,50 @@
       }
       window.addEventListener('resize', adjustSize);
     }
+    function setAutoColor() {
+      switch (autoPlay.value) {
+        case "0":
+          prevAuto.style.color = 'rgba(255, 255, 255, 1)';
+          nextAuto.style.color = 'rgba(255, 255, 255, 1)';
+          break;
+        case "1":
+          prevAuto.style.color = 'rgba(255, 255, 255, 1)';
+          nextAuto.style.color = 'rgba(0, 255, 0, 1)';
+          break;
+        case "2":
+          prevAuto.style.color = 'rgba(0, 255, 0, 1)';
+          nextAuto.style.color = 'rgba(255, 255, 255, 1)';
+          break;
+        case "3":
+          prevAuto.style.color = 'rgba(0, 255, 0, 1)';
+          nextAuto.style.color = 'rgba(0, 255, 0, 1)';
+          break;
+      }
+    }
     function openPopupYtAtIndex(index) {
+      console.log("isPlayerReady", isPlayerReady);
+      if (!isPlayerReady) return;
+      console.log("openPopupYtAtIndex", index);
       if (index < 0 || index >= videos.length) return;
-      currentIndex = index;
+      console.log(videos[index]);
+      //vidListのindexに変換
       const [videoId, , , kindRaw] = videos[index];
-      const kind = ((kindRaw & 2) > 0) ? "short" : "normal";
-
-      iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1`;
-      iframe.setAttribute('modestbranding', '1');
-      popup.dataset.kind = kind;
+      console.log(videoId);
+      console.log(kindRaw);
+      index = vidList.findIndex(entry => entry.vid === videoId);
+      console.log(index);
+      if (index < 0) return;
       popup.style.display = 'block';
       popupBg.style.display = 'block';
-
+      setAutoColor();
+      document.getElementById('popupNav').style.display = 'flex';
+      playVideo(index);
+    }
+    function playVideo(index) {
+      currentIndex = index;
+      videoId = vidList[index].vid;
+      kindRaw = vidList[index].kind;
+      const kind = ((kindRaw & 2) > 0) ? "short" : "normal";
       // 縦横判定
       if (kind === "short") {
         popup.classList.remove("landscape");
@@ -819,12 +1029,12 @@
         popup.classList.remove("portrait");
         popup.classList.add("landscape");
       }
-      prevVideo.style.visibility = (index > 0) ? "visible" : "hidden";
-      nextVideo.style.visibility = (index < videos.length - 1) ? "visible" : "hidden";
-      document.getElementById('popupNav').style.display = 'flex';
+      player.loadVideoById(videoId);
+      player.playVideo();
     }
+
     function closePopupYt() {
-      iframe.src = "";
+      player.stopVideo();
       popup.style.display = 'none';
       popupBg.style.display = 'none';
       document.getElementById('popupNav').style.display = 'none';
@@ -837,30 +1047,115 @@
       }
     });
     prevVideo.addEventListener('click', () => {
-      if (currentIndex > 0) openPopupYtAtIndex(currentIndex - 1);
+      if (currentIndex > 0) playVideo(currentIndex - 1);
+      else playVideo(vidList.length - 1)
     });
     nextVideo.addEventListener('click', () => {
-      if (currentIndex < videos.length - 1) openPopupYtAtIndex(currentIndex + 1);
+      if (currentIndex < vidList.length - 1) playVideo(currentIndex + 1);
+      else playVideo(0);
+    });
+    prevAuto.addEventListener('click', () => {
+      switch (autoPlay.value) {
+        case "0":
+          autoPlay.value = "2";
+          break;
+        case "1":
+          autoPlay.value = "3";
+          break;
+        case "2":
+          autoPlay.value = "0";
+          break;
+        case "3":
+          autoPlay.value = "1";
+          break;
+      }
+      setAutoColor();
+    });
+    nextAuto.addEventListener('click', () => {
+      switch (autoPlay.value) {
+        case "0":
+          autoPlay.value = "1";
+          break;
+        case "1":
+          autoPlay.value = "0";
+          break;
+        case "2":
+          autoPlay.value = "3";
+          break;
+        case "3":
+          autoPlay.value = "2";
+          break;
+      }
+      setAutoColor();
     });
 
-    var player;
+
+    let player;
+    let isPlayerReady = false;
+    let vidList = [];
+
     function onYouTubeIframeAPIReady() {
-      console.log('Ready');
       player = new YT.Player('player', {
-        height: '315',
-        width: '560',
-        videoId: 'YOUR_VIDEO_ID',
+        playerVars: {
+          playsinline: 1,
+          autoplay: 0,
+          controls: 1,
+          modestbranding: 1
+        },
         events: {
-          'onStateChange': onPlayerStateChange
+          onReady: () => { isPlayerReady = true; },
+          onStateChange: onPlayerStateChange,
+          onError: onPlayerError
         }
       });
     }
     function onPlayerStateChange(event) {
       if (event.data === YT.PlayerState.ENDED) {
-        console.log('動画が終了しました！');
-        player.loadVideoById('NEXT_VIDEO_ID');
+        switch (autoPlay.value) {
+          case "1":
+            if (currentIndex < vidList.length - 1) playVideo(currentIndex + 1);
+            else playVideo(0)
+            break;
+          case "2":
+            if (currentIndex > 0) playVideo(currentIndex - 1);
+            else playVideo(vidList.length - 1)
+            break;
+          case "3":
+            playVideo(currentIndex);
+            break;
+          default:
+            closePopupYt();
+            break;
+        }
       }
     }
+    function onPlayerError(event) {
+      console.log("Error code:", event.data);
+      if (event.data === 100 || event.data === 101 || event.data === 150) {
+        // 100: 動画が存在しない / 非公開 / 削除済み
+        // 101,150: 埋め込み許可されていない
+        console.log("再生できない動画なのでスキップ");
+        onPlayerStateChange({ data: YT.PlayerState.ENDED });
+      }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const infoIcon = document.getElementById('infoIcon');
+      const speechBubble = document.getElementById('speechBubble');
+
+      infoIcon.addEventListener('click', (event) => {
+        event.stopPropagation();
+        speechBubble.classList.toggle('active');
+      });
+
+      document.addEventListener('click', (event) => {
+        if (!infoIcon.contains(event.target) && !speechBubble.contains(event.target)) {
+          if (speechBubble.classList.contains('active')) {
+            speechBubble.classList.remove('active');
+          }
+        }
+      });
+    });
+
   </script>
 </body>
 
