@@ -942,12 +942,6 @@
       popupImg.style.display = "block";
       modal.appendChild(popupImg);
       document.body.appendChild(modal);
-
-      modal.addEventListener('click', () => {
-        window.removeEventListener('resize', adjustSize);
-        document.body.removeChild(modal);
-      });
-
       const urls = [
         `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
         `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
@@ -981,6 +975,16 @@
         popupImg.style.maxHeight = vh + "px";
       }
       window.addEventListener('resize', adjustSize);
+      modal.addEventListener('click', () => {
+        closePopupImg();
+      });
+    }
+    function closePopupImg() {
+      const modal = document.getElementById("popupImgModal");
+      if (modal) {
+        window.removeEventListener('resize', adjustSize);
+        document.body.removeChild(modal);
+      }
     }
     function setAutoColor() {
       switch (autoPlay.value) {
@@ -1033,22 +1037,19 @@
     }
 
     function closePopupYt() {
-      player.stopVideo();
-      popup.style.display = 'none';
-      popupBg.style.display = 'none';
-      document.getElementById('popupNav').style.display = 'none';
+      if (popup.style.display != 'none') {
+        player.stopVideo();
+        popup.style.display = 'none';
+        popupBg.style.display = 'none';
+        document.getElementById('popupNav').style.display = 'none';
+      }
     }
     popupBg.addEventListener('click', closePopupYt);
     closeBtn.addEventListener('click', closePopupYt);
     document.addEventListener('keydown', (e) => {
       if (e.key === "Escape") {
-        if (popup.style.display != 'none') {
-          closePopupYt();
-        }
-        const modal = document.getElementById("popupImgModal");
-        if (modal) {
-          document.body.removeChild(modal);
-        }
+        closePopupYt();
+        closePopupImg();
       }
     });
     prevVideo.addEventListener('click', () => {
