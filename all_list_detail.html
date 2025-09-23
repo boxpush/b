@@ -774,8 +774,6 @@
         } else {
           vidList = videos.map(([vid, kind]) => ({ vid, kind }));
         }
-        console.log("vidList", vidList);
-        console.log("len", vidList.length);
         loading.style.display = 'none';
         document.getElementById('videoTable').style.display = '';
         document.getElementById('paginationTop').style.display = '';
@@ -936,6 +934,7 @@
       modal.style.justifyContent = "center";
       modal.style.overflow = "auto";
       modal.style.zIndex = 1000;
+      modal.id = "popupImgModal";
 
       const popupImg = document.createElement('img');
       popupImg.style.objectFit = "contain";
@@ -1004,17 +1003,11 @@
       }
     }
     function openPopupYtAtIndex(index) {
-      console.log("isPlayerReady", isPlayerReady);
       if (!isPlayerReady) return;
-      console.log("openPopupYtAtIndex", index);
       if (index < 0 || index >= videos.length) return;
-      console.log(videos[index]);
       //vidListのindexに変換
       const [videoId, , , kindRaw] = videos[index];
-      console.log(videoId);
-      console.log(kindRaw);
       index = vidList.findIndex(entry => entry.vid === videoId);
-      console.log(index);
       if (index < 0) return;
       popup.style.display = 'block';
       popupBg.style.display = 'block';
@@ -1049,7 +1042,13 @@
     closeBtn.addEventListener('click', closePopupYt);
     document.addEventListener('keydown', (e) => {
       if (e.key === "Escape") {
-        closePopupYt();
+        if (popup.style.display != 'none') {
+          closePopupYt();
+        }
+        const modal = document.getElementById("popupImgModal");
+        if (modal) {
+          document.body.removeChild(modal);
+        }
       }
     });
     prevVideo.addEventListener('click', () => {
@@ -1130,17 +1129,15 @@
             playVideo(currentIndex);
             break;
           default:
-            closePopupYt();
+            //closePopupYt();
             break;
         }
       }
     }
     function onPlayerError(event) {
-      console.log("Error code:", event.data);
       if (event.data === 100 || event.data === 101 || event.data === 150) {
         // 100: 動画が存在しない / 非公開 / 削除済み
         // 101,150: 埋め込み許可されていない
-        console.log("再生できない動画なのでスキップ");
         onPlayerStateChange({ data: YT.PlayerState.ENDED });
       }
     }
