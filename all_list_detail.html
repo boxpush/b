@@ -989,19 +989,19 @@
           closePopupImg();
         }
       }
+      function closePopupImg() {
+        const modal = document.getElementById("popupImgModal");
+        if (modal) {
+          window.removeEventListener('resize', adjustSize);
+          document.removeEventListener('keydown', keydown);
+          document.body.removeChild(modal);
+        }
+      }
       window.addEventListener('resize', adjustSize);
       modal.addEventListener('click', () => {
         closePopupImg();
       });
       document.addEventListener('keydown', keydown);
-    }
-    function closePopupImg() {
-      const modal = document.getElementById("popupImgModal");
-      if (modal) {
-        window.removeEventListener('resize', adjustSize);
-        document.removeEventListener('keydown', keydown);
-        document.body.removeChild(modal);
-      }
     }
     function setAutoColor() {
       switch (autoPlay.value) {
