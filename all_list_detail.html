@@ -213,6 +213,7 @@
       font-size: 12px;
       cursor: pointer;
     }
+
     #prevVideo,
     #nextVideo {
       background: rgba(0, 0, 0, 0.6);
@@ -223,6 +224,7 @@
       font-size: 20px;
       cursor: pointer;
     }
+
     #closeBtn {
       position: absolute;
       top: 0;
@@ -236,27 +238,32 @@
       padding: 8px 12px;
       border-radius: 0;
     }
+
     @media (orientation: portrait) {
       .navColumn:first-child {
-        transform: translateX(-40px); 
+        transform: translateX(-40px);
         gap: 40px;
       }
+
       .navColumn:last-child {
-        transform: translateX(40px); 
+        transform: translateX(40px);
         gap: 40px;
-      }      
+      }
+
       #prevVideo,
       #nextVideo {
         font-size: 32px;
         padding: 8px 8px;
       }
+
       #prevAuto,
       #nextAuto {
         font-size: 20px;
         padding: 20px 8px;
       }
+
       #closeBtn {
-        transform: translateX(20px); 
+        transform: translateX(20px);
         font-size: 64px;
         padding: 2px 2px;
       }
@@ -272,6 +279,7 @@
       background: rgba(0, 0, 0, 0.8);
       z-index: 999;
     }
+
     #popup {
       display: none;
       text-align: center;
@@ -375,6 +383,11 @@
     <span class="info-container" id="infoIcon">
       <span class="info-icon">?</span>
       <div class="speech-bubble" id="speechBubble">
+        <div>・通常検索</div>
+        <div>　AND OR NOT ()が使用可能</div>
+        <div>　厳密に検索するなら単語を""で括る</div>
+        <div>・Regex検索(高度な正規表現は使えません)</div>
+        <div>　ex.&nbsp;\w&nbsp;\d&nbsp;*?&nbsp;+?&nbsp;(?=...)&nbsp;(?!...)など</div>
         <div>・「種」の絵文字クリックでポップアップ再生</div>
         <div>　　←→で前後の動画を再生</div>
         <div>　　AUTOで前後の動画を自動再生</div>
@@ -382,16 +395,9 @@
         <div>　　　→ページ内をループ再生</div>
         <div>　　「ループ再生」ありで検索したとき</div>
         <div>　　　→全ページをループ再生</div>
-        <div>・通常検索</div>
-        <div>　AND OR NOT ()が使用可能</div>
-        <div>　厳密に検索するなら単語を""で括る</div>
-        <div>・Regex検索(高度な正規表現は使えません)</div>
-        <div>　ex.　\w \d *? +? (?=...) (?!...)など</div>
-
+        <div>　　　※検索に時間がかかります</div>
       </div>
     </span>
-
-
   </h2>
   <div id="searchForm">
     <div>
@@ -447,11 +453,11 @@
       <div class="left-column">
         <div class="row">
           <label><input type="checkbox" id="regex">Regex</label>
-          <input type="text" id="searchInput" placeholder="スペース区切りでタイトルのAND検索" value="" />
+          <input type="text" id="searchInput" placeholder="スペース区切りでタイトルのAND検索" value="" autocomplete="on" />
         </div>
         <div class="row">
           <label><input type="checkbox" id="regex2">Regex</label>
-          <input type="text" id="searchInput2" placeholder="スペース区切りで説明のAND検索" value="" />
+          <input type="text" id="searchInput2" placeholder="スペース区切りで説明のAND検索" value="" autocomplete="on" />
         </div>
       </div>
       <div class="">
@@ -555,6 +561,10 @@
     const nextVideo = document.getElementById("nextVideo");
     const prevAuto = document.getElementById("prevAuto");
     const nextAuto = document.getElementById("nextAuto");
+    let player;
+    let isPlayerReady = false;
+    let vidList = [];
+
 
 
     toTimeStr = t => new Date(t * 1e3).toISOString().substr(t < 3600 ? 14 : 11, t < 3600 ? 5 : 8)
@@ -974,15 +984,22 @@
         popupImg.style.maxWidth = vw + "px";
         popupImg.style.maxHeight = vh + "px";
       }
+      function keydown(e) {
+        if (e.key === "Escape") {
+          closePopupImg();
+        }
+      }
       window.addEventListener('resize', adjustSize);
       modal.addEventListener('click', () => {
         closePopupImg();
       });
+      document.addEventListener('keydown', keydown);
     }
     function closePopupImg() {
       const modal = document.getElementById("popupImgModal");
       if (modal) {
         window.removeEventListener('resize', adjustSize);
+        document.removeEventListener('keydown', keydown);
         document.body.removeChild(modal);
       }
     }
@@ -1049,7 +1066,6 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === "Escape") {
         closePopupYt();
-        closePopupImg();
       }
     });
     prevVideo.addEventListener('click', () => {
@@ -1094,11 +1110,6 @@
       }
       setAutoColor();
     });
-
-
-    let player;
-    let isPlayerReady = false;
-    let vidList = [];
 
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('player', {
