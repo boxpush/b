@@ -84,7 +84,8 @@
       x: 1,
       xanchor: "left",
       y: 0.95,          // 1 より大きい値で外側へ
-      yanchor: "top"
+      yanchor: "top",
+      itemsizing: "constant"
     }
     /**
      * 範囲リストに追加する
@@ -195,7 +196,8 @@
             name: d.n,
             line: { width: 1 },
             marker: { size: 2 },
-            legendwidth: 50
+            legendwidth: 50,
+            legendgroup: d.i
           });
         }
         const t = traces[traceIndexMap[d.i]];
@@ -321,7 +323,8 @@
             name: d.n,
             line: { width: 1 },
             marker: { size: 2 },
-            legendwidth: 50
+            legendwidth: 50,
+            legendgroup: d.i
           });
         }
       });
